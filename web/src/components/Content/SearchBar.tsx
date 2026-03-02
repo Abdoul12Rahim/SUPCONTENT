@@ -1,0 +1,34 @@
+import { Input, InputGroup, InputLeftElement, Icon } from '@chakra-ui/react';
+import { SearchIcon } from '@chakra-ui/icons';
+import { useState } from 'react';
+
+interface SearchBarProps {
+  onSearch: (query: string) => void;
+  placeholder?: string;
+}
+
+export const SearchBar = ({ onSearch, placeholder = 'Rechercher un jeu...' }: SearchBarProps) => {
+  const [query, setQuery] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    onSearch(value);
+  };
+
+  return (
+    <InputGroup size="lg">
+      <InputLeftElement pointerEvents="none">
+        <Icon as={SearchIcon} color="gray.400" />
+      </InputLeftElement>
+      <Input
+        value={query}
+        onChange={handleChange}
+        placeholder={placeholder}
+        bg="white"
+        borderRadius="full"
+        _focus={{ borderColor: 'blue.500', shadow: 'outline' }}
+      />
+    </InputGroup>
+  );
+};
