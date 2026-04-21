@@ -75,7 +75,7 @@ export const sendMessage = async (req: Request, res: Response) => {
     if (otherParticipant) {
       await notificationService.createNotification({
         user: otherParticipant._id,
-        type: 'comment', // Utiliser 'comment' car 'message' n'est pas dans le type
+        type: 'message',
         from: req.user!._id,
         reference: conversationId,
         message: `${req.user!.displayName || req.user!.username} vous a envoyé un message`,

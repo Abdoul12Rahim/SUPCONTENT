@@ -22,6 +22,30 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+export const logout = async (req: Request, res: Response) => {
+  try {
+    // Détruit la session côté serveur si elle existe (OAuth/Passport)
+    if (req.session) {
+      await new Promise<void>((resolve, reject) => {
+        req.session.destroy((error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+        });
+      });
+    }
+
+    // Supprime le cookie de session
+    res.clearCookie('connect.sid');
+
+    res.json({ message: 'Déconnexion réussie' });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const getMe = async (req: Request, res: Response) => {
   try {
     const user = await authService.getUserById((req.user as IUser)._id);

@@ -24,6 +24,7 @@ import messageRoutes from './routes/messageRoutes';
 import achievementRoutes from './routes/achievementRoutes';
 import collaborativeListRoutes from './routes/collaborativeListRoutes';
 import listRoutes from './routes/listRoutes';
+import searchRoutes from './routes/searchRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -94,6 +95,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/collaborative-lists', collaborativeListRoutes);
 app.use('/api/lists', listRoutes);
+app.use('/api/search', searchRoutes);
 
 // Gestion des erreurs
 app.use(errorHandler);

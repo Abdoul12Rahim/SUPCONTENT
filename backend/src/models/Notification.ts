@@ -2,7 +2,7 @@
 
 export interface INotification extends Document {
   user: mongoose.Types.ObjectId;
-  type: 'follow' | 'like' | 'comment' | 'recommendation';
+  type: 'follow' | 'like' | 'comment' | 'message' | 'recommendation';
   from: mongoose.Types.ObjectId;
   reference?: mongoose.Types.ObjectId;
   message: string;
@@ -15,7 +15,7 @@ const notificationSchema = new Schema<INotification>(
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     type: { 
       type: String, 
-      enum: ['follow', 'like', 'comment', 'recommendation'],
+      enum: ['follow', 'like', 'comment', 'message', 'recommendation'],
       required: true 
     },
     from: { type: Schema.Types.ObjectId, ref: 'User', required: true },
