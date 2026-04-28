@@ -58,23 +58,26 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/api/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Configuration des sessions
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET!,
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI!,
-      ttl: 24 * 60 * 60, // 1 jour
-    }),
-    cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 1 jour
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-    },
-  })
-);
+const sessionOptions: any = {
+  secret: process.env.SESSION_SECRET || 'test_session_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000, // 1 jour
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+  },
+};
+
+if (process.env.MONGODB_URI) {
+  sessionOptions.store = MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI!,
+    ttl: 24 * 60 * 60, // 1 jour
+  });
+}
+
+app.use(session(sessionOptions));
 
 // Initialisation de Passport
 app.use(passport.initialize());
@@ -122,18 +125,24 @@ export { io };
 // Connexion à la base de données et démarrage du serveur
 import { achievementService } from './services/achievementService';
 
-connectDB().then(async () => {
-  // Initialiser les achievements par défaut
-  await achievementService.initializeDefaultAchievements();
-  console.log('✅ Achievements initialisés');
-  
-  httpServer.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-    console.log(`🔧 Environment: ${process.env.NODE_ENV}`);
-    console.log(`🌐 Web Client: ${process.env.WEB_CLIENT_URL}`);
-    console.log(`📱 Mobile Client: ${process.env.MOBILE_CLIENT_URL}`);
+if (process.env.NODE_ENV !== 'test') {
+  connectDB().then(async () => {
+    // Initialiser les achievements par défaut
+    await achievementService.initializeDefaultAchievements();
+    console.log('✅ Achievements initialisés');
+    
+    httpServer.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`🔧 Environment: ${process.env.NODE_ENV}`);
+      console.log(`🌐 Web Client: ${process.env.WEB_CLIENT_URL}`);
+      console.log(`📱 Mobile Client: ${process.env.MOBILE_CLIENT_URL}`);
+    });
+  }).catch((err)=>{
+    console.error('DB connection failed:', err);
   });
-});
+} else {
+  console.log('Test environment: skipping DB connect and server start');
+}
 
 export default app;
 

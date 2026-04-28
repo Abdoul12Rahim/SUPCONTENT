@@ -28,7 +28,7 @@ export const getOrCreateConversation = async (req: Request, res: Response) => {
     const conversation = await messageService.getOrCreateConversation(req.user!._id, userId);
     res.json(conversation);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -46,7 +46,7 @@ export const getMessages = async (req: Request, res: Response) => {
     );
     res.json(result);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -90,7 +90,7 @@ export const sendMessage = async (req: Request, res: Response) => {
 
     res.status(201).json(message);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -103,7 +103,7 @@ export const markAsRead = async (req: Request, res: Response) => {
     await messageService.markMessagesAsRead(conversationId, req.user!._id);
     res.json({ message: 'Messages marqués comme lus' });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -115,7 +115,7 @@ export const getUnreadCount = async (req: Request, res: Response) => {
     const count = await messageService.getUnreadCount(req.user!._id);
     res.json({ count });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
 
@@ -128,7 +128,7 @@ export const deleteConversation = async (req: Request, res: Response) => {
     await messageService.deleteConversation(conversationId, req.user!._id);
     res.json({ message: 'Conversation supprimée' });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
