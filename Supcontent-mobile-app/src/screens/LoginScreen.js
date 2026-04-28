@@ -9,19 +9,36 @@ const COLORS = {
   textMuted: '#94a3b8',
   accentBlue: '#00d4ff',
 };
-
+// Page de connexion, avec formulaire et intégration de l'API d'authentification
 export default function LoginScreen({ navigation }) {
   const { login } = useContext(AuthContext); 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = () => {
-    console.log("Connexion réussie pour :", email);
-    login(); 
-    navigation.navigate('MainTabs'); 
-  };
+  const [errorMessage, setErrorMessage] = useState(''); 
 
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setErrorMessage("Veuillez remplir tous les champs");
+      return;
+    }
+
+    setErrorMessage(''); 
+    console.log("Tentative de connexion avec :", email);
+    
+    
+    const result = await login(email, password);
+    
+    if (result.success) {
+      
+      navigation.navigate('MainTabs'); 
+    } else {
+      
+      setErrorMessage(result.message);
+    }
+  };
+    //
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground 
@@ -121,7 +138,7 @@ export default function LoginScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
+// Styles pour la page de connexion
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
   backgroundImage: { flex: 1 },
@@ -131,7 +148,7 @@ const styles = StyleSheet.create({
   // Correction de la position du bouton retour
   backBtn: { position: 'absolute', top: Platform.OS === 'ios' ? 50 : 40, left: 24, zIndex: 100, padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 },
   
-  header: { alignItems: 'center', marginBottom: 40, marginTop: 80 }, // Ajout de marginTop pour ne pas cacher le logo sous le bouton retour
+  header: { alignItems: 'center', marginBottom: 40, marginTop: 80 }, 
   logoIconBg: { backgroundColor: COLORS.primary, padding: 16, borderRadius: 24, marginBottom: 16, shadowColor: COLORS.primary, shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } },
   title: { color: 'white', fontSize: 32, fontWeight: '900', marginBottom: 8 },
   subtitle: { color: COLORS.textMuted, fontSize: 14, textAlign: 'center' },

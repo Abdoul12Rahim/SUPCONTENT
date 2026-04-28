@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, SafeAreaView } from 'react-native';
 
 const COLORS = { bgDark: '#191121', primary: '#8a2ce2' };
-
-export default function GamesScreen() { // <-- Change ce nom pour RoomsScreen, MessagesScreen, etc.
+// Page des salons de discussion, avec liste de salons et possibilité d'en créer de nouveaux (À venir)
+export default function GamesScreen() { 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.text}>Page des Jeux saloon (Bientôt !)</Text>

@@ -1,15 +1,47 @@
-import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, Image, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { contentAPI } from '../services/api';
 
 const COLORS = {
   primary: '#8a2ce2', bgDark: '#191121', surfaceDark: '#241a30', surfaceHighlight: '#2d203b', textMuted: '#94a3b8'
 };
 
 export default function GameDetailScreen({ route, navigation }) {
-  // On récupère le jeu cliqué depuis la page précédente
-  const gameTitle = route.params?.game?.title || "Cyberpunk 2077";
-  const gameImage = route.params?.game?.image || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80';
+  const { gameId } = route.params; 
+  
+  // --- NOUVELLE LOGIQUE API ---
+  const [game, setGame] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        setIsLoading(true);
+        
+        const response = await contentAPI.getGameDetails(gameId);
+        setGame(response.data);
+      } catch (error) {
+        console.log("Erreur API Détails :", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (gameId) {
+      fetchDetails();
+    }
+  }, [gameId]);
+
+
+  if (isLoading || !game) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={{ color: COLORS.textMuted, marginTop: 10 }}>Chargement des données RAWG...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -27,16 +59,21 @@ export default function GameDetailScreen({ route, navigation }) {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
         <View style={styles.heroContainer}>
-          <Image source={{ uri: gameImage }} style={styles.heroImage} />
+          {/* On utilise la vraie image dynamique */}
+          <Image source={{ uri: game.backgroundImage || 'https://via.placeholder.com/800x400' }} style={styles.heroImage} />
           <View style={styles.heroOverlay}>
             <View style={styles.heroContentRow}>
               <View style={{flex: 1}}>
-                <View style={styles.editorsChoice}><Text style={styles.editorsChoiceText}>Editor's Choice</Text></View>
-                <Text style={styles.heroTitle}>{gameTitle}</Text>
+                {game.rating > 4.5 && (
+                   <View style={styles.editorsChoice}><Text style={styles.editorsChoiceText}>Top Rated</Text></View>
+                )}
+                {/* On utilise le vrai titre dynamique */}
+                <Text style={styles.heroTitle}>{game.title}</Text>
               </View>
               <View style={styles.metascoreBox}>
-                <Text style={styles.metascoreLabel}>METASCORE</Text>
-                <Text style={styles.metascoreValue}>86</Text>
+                <Text style={styles.metascoreLabel}>RATING</Text>
+                {/* On affiche la vraie note sur 5 */}
+                <Text style={styles.metascoreValue}>{game.rating || 'N/A'}</Text>
               </View>
             </View>
           </View>
@@ -44,15 +81,21 @@ export default function GameDetailScreen({ route, navigation }) {
 
         {/* Tags & Description */}
         <View style={styles.detailsSection}>
-          <Text style={styles.tagsText}>RPG  •  Open World  •  Sci-Fi  •  2020</Text>
+          {/* On affiche les vrais genres */}
+          <Text style={styles.tagsText}>
+            {game.genres && game.genres.length > 0 ? game.genres.join('  •  ') : 'Action  •  Adventure'} 
+            {game.released ? `  •  ${game.released.substring(0, 4)}` : ''}
+          </Text>
+          
+          {/* On affiche la vraie description (RAWG la donne parfois avec des balises HTML, on verra si c'est le cas) */}
           <Text style={styles.description}>
-            Cyberpunk 2077 is an open-world, action-adventure RPG set in the megalopolis of Night City, where you play as a cyberpunk mercenary wrapped up in a do-or-die fight for survival.
+            {game.description || "Aucune description disponible pour ce jeu pour le moment."}
           </Text>
           
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity style={styles.buyBtn}>
               <MaterialIcons name="shopping-cart" size={20} color="white" />
-              <Text style={styles.buyBtnText}>Buy Now $59.99</Text>
+              <Text style={styles.buyBtnText}>Play Now</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.favBtn}>
               <MaterialIcons name="favorite-border" size={24} color="white" />
@@ -62,6 +105,7 @@ export default function GameDetailScreen({ route, navigation }) {
 
         <View style={styles.divider} />
 
+        {/* --- LE RESTE DE TA PAGE RESTE IDENTIQUE (Achievements, Reviews) --- */}
         {/* Achievements */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -95,12 +139,12 @@ export default function GameDetailScreen({ route, navigation }) {
           <Text style={styles.sectionTitle}>Reviews & Ratings</Text>
           <View style={styles.ratingCard}>
              <View style={styles.scoreCol}>
-               <Text style={styles.bigScore}>4.3</Text>
+               <Text style={styles.bigScore}>{game.rating || '0.0'}</Text>
                <View style={{flexDirection: 'row', marginVertical: 4}}>
                  {[1,2,3,4].map(i => <MaterialIcons key={i} name="star" size={16} color="#facc15" />)}
                  <MaterialIcons name="star-half" size={16} color="#facc15" />
                </View>
-               <Text style={styles.reviewCount}>12.4k Reviews</Text>
+               <Text style={styles.reviewCount}>{game.ratingsCount || '0'} Reviews</Text>
              </View>
              <View style={styles.barsCol}>
                 <TouchableOpacity style={styles.writeReviewBtn}>
@@ -109,24 +153,20 @@ export default function GameDetailScreen({ route, navigation }) {
              </View>
           </View>
 
-          {/* User Review */}
+          {/* User Review (Factice pour l'instant) */}
           <View style={styles.userReviewCard}>
             <View style={styles.reviewUserRow}>
                <Image source={{uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}} style={styles.avatar} />
                <View>
                  <Text style={styles.reviewerName}>Kai_Runner</Text>
                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <MaterialIcons name="star" size={12} color="#facc15" />
-                    <MaterialIcons name="star" size={12} color="#facc15" />
-                    <MaterialIcons name="star" size={12} color="#facc15" />
-                    <MaterialIcons name="star" size={12} color="#facc15" />
-                    <MaterialIcons name="star" size={12} color="#facc15" />
+                    {[1,2,3,4,5].map(i => <MaterialIcons key={i} name="star" size={12} color="#facc15" />)}
                     <Text style={styles.reviewDate}>  2 days ago</Text>
                  </View>
                </View>
             </View>
             <Text style={styles.reviewBody}>
-              Finally finished the main storyline. The graphics on the new update are insane! Night City feels more alive than ever.
+              Excellent jeu ! Les graphismes sont incroyables et l'histoire est très prenante.
             </Text>
           </View>
         </View>

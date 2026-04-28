@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 const COLORS = {
   primary: '#8a2ce2', bgDark: '#191121', textMuted: '#94a3b8', surfaceDark: '#241a30'
 };
-
+// Composant générique pour inviter les utilisateurs non connectés à se connecter ou s'inscrire lorsqu'ils essaient d'accéder à des pages protégées (profil, messages, salons, etc.)
 export default function GuestPrompt({ icon, title, message }) {
   const navigation = useNavigation();
 

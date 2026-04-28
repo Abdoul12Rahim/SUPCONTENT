@@ -15,7 +15,7 @@ export default function RegisterScreen({ navigation }) {
 
   const handleRegister = () => {
     console.log("Tentative d'inscription pour :", username);
-    // Plus tard : appel à ton backend pour créer le compte
+    
   };
 
   return (
@@ -100,7 +100,7 @@ export default function RegisterScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
+// Page d'inscription, similaire à la page de connexion mais avec des champs supplémentaires et une logique d'inscription (à implémenter)
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.bgDark },
   backgroundImage: { flex: 1 },

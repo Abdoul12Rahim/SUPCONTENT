@@ -1,6 +1,7 @@
-import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, Image, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { contentAPI } from '../services/api';
 // Couleurs de la charte graphique
 const COLORS = {
   primary: '#8a2ce2',
@@ -11,8 +12,30 @@ const COLORS = {
   panelBg: 'rgba(138, 44, 226, 0.05)',
   panelBorder: 'rgba(138, 44, 226, 0.2)',
 };
+// Page d'accueil avec les sections "Hero", "Continue Playing", "Popular Now" (connecté à l'API)
+export default function HomeScreen({ navigation }) {
+  
+ const [popularGames, setPopularGames] = useState([]); 
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function HomeScreen() {
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        setIsLoading(true);
+        const response = await contentAPI.getPopular(1);
+        const gamesList = response.data.results || response.data;
+        setPopularGames(gamesList.slice(0, 5)); 
+        console.log("Voici à quoi ressemble un jeu :", gamesList[0]);
+      } catch (error) {
+        console.log("Erreur API :", error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGames();
+  }, []);
+  
   return (
     <SafeAreaView style={styles.container}>
       {/* HEADER FIXE */}
@@ -92,39 +115,54 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        {/* POPULAR NOW */}
+        {/* POPULAR NOW - CONNECTÉ À L'API ! */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderBetween}>
             <Text style={styles.sectionTitle}>Popular Now</Text>
-            <Text style={styles.viewAllText}>View all</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Games')}>
+              <Text style={styles.viewAllText}>View all</Text>
+            </TouchableOpacity>
           </View>
+          
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
-            <View style={styles.popularCard}>
-              <Image source={{ uri: 'https://images.unsplash.com/photo-1505506874110-6a7a6c9924cb?auto=format&fit=crop&w=500&q=80' }} style={styles.popularImage} />
-              <View style={styles.popularInfo}>
-                <View>
-                  <Text style={styles.popularTitle}>Vanguard Siege</Text>
-                  <Text style={styles.popularOnline}>12k Online</Text>
-                </View>
-                <View style={styles.ratingContainer}>
-                  <MaterialIcons name="star" size={16} color={COLORS.accentBlue} />
-                  <Text style={styles.ratingText}>4.9</Text>
-                </View>
-              </View>
-            </View>
-             <View style={styles.popularCard}>
-              <Image source={{ uri: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=500&q=80' }} style={styles.popularImage} />
-              <View style={styles.popularInfo}>
-                <View>
-                  <Text style={styles.popularTitle}>Overcharge</Text>
-                  <Text style={styles.popularOnline}>8.4k Online</Text>
-                </View>
-                <View style={styles.ratingContainer}>
-                  <MaterialIcons name="star" size={16} color={COLORS.accentBlue} />
-                  <Text style={styles.ratingText}>4.7</Text>
-                </View>
-              </View>
-            </View>
+           {isLoading ? (
+   <View style={{ width: 300, height: 180, justifyContent: 'center', alignItems: 'center' }}>
+     <ActivityIndicator size="large" color={COLORS.primary} />
+   </View>
+) : popularGames.length > 0 ? (
+  popularGames.map((game, index) => (
+  <TouchableOpacity 
+  
+    key={game.externalId ? game.externalId.toString() : index.toString()} 
+    style={styles.popularCard}
+   
+    onPress={() => navigation.navigate('GameDetail', { gameId: game.externalId })}
+  >
+    <Image 
+      
+      source={{ uri: game.backgroundImage || 'https://via.placeholder.com/500x300' }} 
+      style={styles.popularImage} 
+    />
+    <View style={styles.popularInfo}>
+      <View style={{ flex: 1 }}>
+        {/* On utilise title au lieu de name */}
+        <Text style={styles.popularTitle} numberOfLines={1}>{game.title}</Text>
+        <Text style={styles.popularOnline}>
+          {game.ratingsCount ? `${game.ratingsCount} avis` : 'Trending'}
+        </Text>
+      </View>
+      <View style={styles.ratingContainer}>
+        <MaterialIcons name="star" size={16} color={COLORS.accentBlue} />
+        <Text style={styles.ratingText}>{game.rating || 'N/A'}</Text>
+      </View>
+    </View>
+  </TouchableOpacity>
+))
+) : (
+   <View style={{ width: 300, height: 180, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.surfaceDark, borderRadius: 16 }}>
+     <Text style={{ color: COLORS.textMuted }}>Serveur hors-ligne</Text>
+   </View>
+)}
           </ScrollView>
         </View>
         
@@ -133,7 +171,6 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -34,7 +34,7 @@ export default function BottomNav({ state, navigation }) {
           });
 
           if (!isFocused && !event.defaultPrevented) {
-            // Si on n'est pas déjà sur la page, on y va !
+            // Si on n'est pas déjà sur la page, on y va 
             navigation.navigate(route.name);
           }
         };

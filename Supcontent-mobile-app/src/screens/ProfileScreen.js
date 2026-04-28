@@ -16,11 +16,10 @@ export default function ProfileScreen({ navigation, route }) {
 
   const { isLoggedIn } = useContext(AuthContext);
   // 1. Logique de profil (Simulée pour le moment)
-  // Si on passe un ID dans la navigation, c'est le profil d'un autre. Sinon, c'est le nôtre.
   const isMyProfile = !route.params?.userId; 
   
   // 2. Logique des sous-onglets (Bibliothèque vs Activité)
-  const [activeTab, setActiveTab] = useState('library'); // 'library' ou 'activity'
+  const [activeTab, setActiveTab] = useState('library'); 
 
   if (isMyProfile && !isLoggedIn) {
     return (
@@ -40,7 +39,7 @@ export default function ProfileScreen({ navigation, route }) {
             <MaterialIcons name="arrow-back" size={24} color={COLORS.textMuted} />
           </TouchableOpacity>
         ) : (
-          <View style={{ width: 40 }} /> // Espace vide pour centrer le titre
+          <View style={{ width: 40 }} />
         )}
         
         <Text style={styles.headerTitle}>{isMyProfile ? "My Profile" : "Profile"}</Text>

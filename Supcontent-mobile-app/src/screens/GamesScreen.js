@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, FlatList, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, FlatList, Image, TouchableOpacity, TextInput, ScrollView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { contentAPI } from '../services/api'; 
 
 const COLORS = {
   primary: '#8a2ce2', bgDark: '#191121', surfaceDark: '#271b32', borderDark: '#362546', textMuted: '#94a3b8'
@@ -10,13 +11,27 @@ const CATEGORIES = ['All Games', 'Action', 'RPG', 'Strategy', 'Adventure', 'Indi
 
 export default function GamesScreen({ navigation }) {
   const [activeCategory, setActiveCategory] = useState('All Games');
+  
+  // --- NOUVELLE LOGIQUE API ---
+  const [games, setGames] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fausses données en attendant l'API
-  const games = [
-    { id: '1', title: 'Eldoria Realms', genre: 'Adventure • Open World', rating: 4.8, image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=500&q=80' },
-    { id: '2', title: 'Astra Conflict', genre: 'Strategy • Sci-Fi', rating: 4.7, image: 'https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&w=500&q=80' },
-    { id: '3', title: 'Nitro Velocity', genre: 'Racing • Simulation', rating: 4.5, image: 'https://images.unsplash.com/photo-1505506874110-6a7a6c9924cb?auto=format&fit=crop&w=500&q=80' },
-  ];
+  useEffect(() => {
+    const fetchDiscoveryGames = async () => {
+      try {
+        setIsLoading(true);
+       
+        const response = await contentAPI.getPopular(2); 
+        setGames(response.data.results || response.data);
+      } catch (error) {
+        console.log("Erreur API Discovery :", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDiscoveryGames();
+  }, []);
 
   // LE HAUT DE LA PAGE (Recherche, Filtres, Featured Game)
   const ListHeader = () => (
@@ -52,12 +67,12 @@ export default function GamesScreen({ navigation }) {
       {/* Featured Game */}
       <TouchableOpacity 
         style={styles.featuredCard} 
-        onPress={() => navigation.navigate('GameDetail', { gameId: 'featured' })}
+        onPress={() => navigation.navigate('GameDetail', { gameId: 58781 })} // Par exemple Skyrim par défaut
       >
-        <Image source={{ uri: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=800&q=80' }} style={styles.featuredImage} />
+        <Image source={{ uri: 'https://media.rawg.io/media/games/b40/b40eba32d8715d5fdf9634939fe0eca3.jpg' }} style={styles.featuredImage} />
         <View style={styles.featuredOverlay}>
           <View style={styles.featuredBadge}><Text style={styles.featuredBadgeText}>FEATURED</Text></View>
-          <Text style={styles.featuredTitle}>Neon Syndicate</Text>
+          <Text style={styles.featuredTitle}>The Elder Scrolls VI</Text>
           <View style={styles.featuredInfo}>
             <Text style={styles.featuredGenre}>Action RPG</Text>
             <View style={styles.ratingBox}>
@@ -69,35 +84,44 @@ export default function GamesScreen({ navigation }) {
       </TouchableOpacity>
 
       <Text style={styles.sectionTitle}>Trending Now</Text>
+      
+      {/* On ajoute la roue de chargement ici si l'API cherche encore */}
+      {isLoading && <ActivityIndicator size="large" color={COLORS.primary} style={{ marginTop: 20 }} />}
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={games}
+        data={games} 
         ListHeaderComponent={ListHeader}
-        keyExtractor={item => item.id}
+        
+        keyExtractor={(item, index) => item.externalId ? item.externalId.toString() : index.toString()}
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <TouchableOpacity 
             style={styles.gameCard}
-            onPress={() => navigation.navigate('GameDetail', { game: item })}
+            
+            onPress={() => navigation.navigate('GameDetail', { gameId: item.externalId })}
           >
             <View style={styles.cardImageContainer}>
-              <Image source={{ uri: item.image }} style={styles.cardImage} />
+              {/* On utilise backgroundImage */}
+              <Image source={{ uri: item.backgroundImage || 'https://via.placeholder.com/500' }} style={styles.cardImage} />
               <View style={styles.cardRatingOverlay}>
                 <MaterialIcons name="star" size={12} color="#facc15" />
-                <Text style={styles.cardRatingText}>{item.rating}</Text>
+                <Text style={styles.cardRatingText}>{item.rating || 'N/A'}</Text>
               </View>
             </View>
             <View style={styles.cardContent}>
               <View style={styles.cardTopRow}>
-                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.cardTitle} numberOfLines={1}>{item.title}</Text>
                 <MaterialIcons name="favorite-border" size={20} color={COLORS.textMuted} />
               </View>
-              <Text style={styles.cardGenre}>{item.genre}</Text>
+              {/* Le backend envoie un tableau "genres", on le transforme en texte */}
+              <Text style={styles.cardGenre}>
+                {item.genres && item.genres.length > 0 ? item.genres.join(' • ') : 'Action • Adventure'}
+              </Text>
               <View style={styles.cardBtn}>
                 <Text style={styles.cardBtnText}>View Details</Text>
                 <MaterialIcons name="arrow-forward" size={16} color={COLORS.primary} />
