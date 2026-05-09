@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Ce fichier centralise toutes les interactions avec ton backend.
+// Ce fichier centralise toutes les interactions avec backend.
 const API_URL = 'http://192.168.1.57:5000/api'; 
 
 const api = axios.create({
@@ -41,6 +41,8 @@ export const contentAPI = {
   getNew: (page = 1) => api.get(`/content/new?page=${page}`),
   search: (query) => api.get(`/content/search?q=${query}`),
 };
-
+export const dealsAPI = {
+  getTopDeals: () => axios.get('https://www.cheapshark.com/api/1.0/deals?storeID=1&upperPrice=20&sortBy=Deal Rating')
+};
 
 export default api;

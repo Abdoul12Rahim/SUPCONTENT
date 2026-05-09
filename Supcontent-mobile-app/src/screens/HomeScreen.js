@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, ScrollView, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect,useRef } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, ScrollView, Image,FlatList, TouchableOpacity, TextInput,Linking, ActivityIndicator ,Dimensions} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { contentAPI } from '../services/api';
+import { contentAPI,dealsAPI } from '../services/api';
 // Couleurs de la charte graphique
 const COLORS = {
   primary: '#8a2ce2',
@@ -12,20 +12,94 @@ const COLORS = {
   panelBg: 'rgba(138, 44, 226, 0.05)',
   panelBorder: 'rgba(138, 44, 226, 0.2)',
 };
-// Page d'accueil avec les sections "Hero", "Continue Playing", "Popular Now" (connecté à l'API)
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width * 0.85; 
+const SPACING = 15;
+// Liste de nos Salons Actifs (Mock data en attendant le backend)
+const ACTIVE_ROOMS = [
+  { id: '101', game: "GTA VI", usersCount: 142, image: "https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&w=200&q=80" },
+  { id: '102', game: "Valorant", usersCount: 89, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200&q=80" },
+  { id: '103', game: "Elden Ring", usersCount: 56, image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=200&q=80" },
+  { id: '104', game: "Fortnite", usersCount: 204, image: "https://images.unsplash.com/photo-1505506874110-6a7a6c9924cb?auto=format&fit=crop&w=200&q=80" },
+  { id: '105', game: "Minecraft", usersCount: 73, image: "https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&w=200&q=80" },
+];
+// Liste de nos événements (Hassane pourra les mettre dans la BDD plus tard)
+const RAW_EVENTS = [
+  { id: '1', title: "Call of Duty League 2026 - Major Championship", category: "TOURNOI E-SPORT", status: "🔴 EN DIRECT", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80", url: "https://www.twitch.tv/callofduty" },
+  { id: '2', title: "PlayStation Showcase : Les sorties de la rentrée", category: "CONFÉRENCE", status: "CE SOIR 20H", image: "https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&w=800&q=80", url: "https://www.youtube.com/playstation" },
+  { id: '3', title: "Elden Ring - World Record Speedrun Attempt", category: "SPEEDRUN", status: "🔴 EN DIRECT", image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=800&q=80", url: "https://www.twitch.tv" },
+  { id: '4', title: "Global Game Jam 2026 - Finales des développeurs", category: "INDIE DEV", status: "DEMAIN 14H", image: "https://images.unsplash.com/photo-1505506874110-6a7a6c9924cb?auto=format&fit=crop&w=800&q=80", url: "https://globalgamejam.org" }
+];
+
+// Petite fonction pour mélanger le tableau aléatoirement
+const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
+// Les news du jour (Mock data)
+const HEADLINES = [
+  { id: '1', source: 'IGN', title: 'Le prochain grand RPG s\'annonce massif : Premier aperçu', time: 'Il y a 2h', image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80' },
+  { id: '2', source: 'JeuxVideo.com', title: 'E-sport : Les résultats choquants du tournoi de ce week-end', time: 'Il y a 5h', image: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=400&q=80' },
+];
+
+// Les catégories d'exploration
+const PLATFORMS = [
+  { id: 'pc', name: 'PC', icon: '💻' },
+  { id: 'ps', name: 'PlayStation', icon: '🎮' },
+  { id: 'xbox', name: 'Xbox', icon: '🟢' },
+  { id: 'nintendo', name: 'Switch', icon: '🔴' }
+];
 export default function HomeScreen({ navigation }) {
   
  const [popularGames, setPopularGames] = useState([]); 
   const [isLoading, setIsLoading] = useState(true);
+const [featuredDeal, setFeaturedDeal] = useState(null);
+const [events, setEvents] = useState([]);
 
+  const flatListRef = useRef(null);
+
+  // 2. Le minuteur du défilement automatique
   useEffect(() => {
-    const fetchGames = async () => {
+   
+    if (events.length === 0) return;
+
+    let currentIndex = 0;
+    
+    const timer = setInterval(() => {
+      currentIndex++;
+      
+    
+      if (currentIndex >= events.length) {
+        currentIndex = 0;
+      }
+
+      
+      flatListRef.current?.scrollToOffset({
+        offset: currentIndex * (CARD_WIDTH + SPACING),
+        animated: true, 
+      });
+    }, 3500); 
+
+   
+    return () => clearInterval(timer);
+  }, [events]);
+
+
+// 1. Récupération des données de l'API au chargement du composant
+ useEffect(() => {
+    const fetchHomeData = async () => {
       try {
         setIsLoading(true);
-        const response = await contentAPI.getPopular(1);
-        const gamesList = response.data.results || response.data;
-        setPopularGames(gamesList.slice(0, 5)); 
-        console.log("Voici à quoi ressemble un jeu :", gamesList[0]);
+        setEvents(shuffleArray(RAW_EVENTS));
+        const [gamesResponse, dealsResponse] = await Promise.all([
+          contentAPI.getPopular(1),
+          dealsAPI.getTopDeals()
+        ]);
+        
+        const gamesList = gamesResponse.data.results || gamesResponse.data;
+        setPopularGames(gamesList.slice(0, 5));
+        
+        if (dealsResponse.data && dealsResponse.data.length > 0) {
+          setFeaturedDeal(dealsResponse.data[0]); 
+        }
+
       } catch (error) {
         console.log("Erreur API :", error.message);
       } finally {
@@ -33,9 +107,25 @@ export default function HomeScreen({ navigation }) {
       }
     };
 
-    fetchGames();
+    fetchHomeData();
   }, []);
+  // On prend le premier événement de la liste pour la section "Événement Spécial"
+  const specialEvent = {
+    title: "Call of Duty League 2026 - Major Championship",
+    category: "TOURNOI E-SPORT",
+    status: "🔴 EN DIRECT",
+    image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80", 
+    url: "https://www.twitch.tv/callofduty"
+  };
+
   
+  const openEventLink = async () => {
+    try {
+      await Linking.openURL(specialEvent.url);
+    } catch (error) {
+      console.log("Impossible d'ouvrir le lien :", error);
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       {/* HEADER FIXE */}
@@ -70,53 +160,127 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* HERO SECTION */}
-        <View style={styles.heroSection}>
+ {/* SECTION ÉVÉNEMENTS (Scroll Horizontal Aléatoire) */}
+<View style={{ marginTop: 20, marginBottom: 10 }}>
+  <Text style={[styles.sectionTitle, { marginLeft: 20, marginBottom: 15 }]}>Live & Upcoming Events</Text>
+  
+<FlatList
+    ref={flatListRef} 
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    data={events}
+    keyExtractor={(item) => item.id}
+    
+    
+    snapToInterval={CARD_WIDTH + SPACING} 
+    snapToAlignment="start"
+    decelerationRate="fast"
+    disableIntervalMomentum={true}
+    
+  
+    contentContainerStyle={{ paddingHorizontal: 20 }} 
+    
+    renderItem={({ item }) => (
+      
+      
+      <View style={{ width: CARD_WIDTH, marginRight: SPACING }}>
+        
+        <TouchableOpacity 
+          
+          style={[styles.heroSection, { width: '100%', margin: 0, marginHorizontal: 0, marginTop: 0 }]} 
+          activeOpacity={0.9} 
+          onPress={() => Linking.openURL(item.url)} 
+        >
           <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80' }} 
+            source={{ uri: item.image }} 
             style={styles.heroImage} 
           />
           <View style={styles.heroOverlay}>
-            <View style={styles.badge}>
-              <View style={styles.badgeDot} />
-              <Text style={styles.badgeText}>Special Event Live</Text>
+            
+            <View style={[styles.badge, { backgroundColor: item.status.includes('DIRECT') ? 'rgba(220, 38, 38, 0.9)' : 'rgba(59, 130, 246, 0.9)', borderColor: 'transparent' }]}>
+              <Text style={[styles.badgeText, { color: 'white', fontWeight: 'bold' }]}>
+                {item.status}
+              </Text>
             </View>
-            <Text style={styles.heroTitle}>Neon Nights: The Cyber Siege</Text>
+            
+            <Text style={{ color: '#94a3b8', fontSize: 12, fontWeight: 'bold', marginBottom: 4, letterSpacing: 1 }}>
+              {item.category}
+            </Text>
+            <Text style={styles.heroTitle} numberOfLines={2}>
+              {item.title}
+            </Text>
+            
             <View style={styles.heroButtons}>
-              <TouchableOpacity style={styles.btnPrimary}>
-                <Text style={styles.btnPrimaryText}>Explore</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.btnSecondary}>
-                <Text style={styles.btnSecondaryText}>Details</Text>
+              <TouchableOpacity 
+                style={[styles.btnPrimary, { backgroundColor: '#9146FF', width: '100%', justifyContent: 'center' }]}
+                onPress={() => Linking.openURL(item.url)}
+              >
+                <Text style={[styles.btnPrimaryText, { textAlign: 'center' }]}>Rejoindre</Text>
               </TouchableOpacity>
             </View>
+            
           </View>
+        </TouchableOpacity>
+        
+      </View>
+    )}
+  />
+</View>
+          {/* SECTION SALONS ACTIFS (Preuve Sociale) */}
+<View style={{ marginTop: 10, marginBottom: 20 }}>
+  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 15 }}>
+    <Text style={styles.sectionTitle}>Salons Actifs </Text>
+    <TouchableOpacity>
+      <Text style={{ color: '#9146FF', fontWeight: 'bold' }}>Voir tout</Text>
+    </TouchableOpacity>
+  </View>
+
+  <FlatList
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    data={ACTIVE_ROOMS}
+    keyExtractor={(item) => item.id}
+    contentContainerStyle={{ paddingHorizontal: 20 }}
+    renderItem={({ item }) => (
+      <TouchableOpacity 
+        style={{ alignItems: 'center', marginRight: 20 }}
+        activeOpacity={0.7}
+        
+        onPress={() => alert(`Rejoindre le salon ${item.game} (${item.usersCount} en ligne)`)} 
+      >
+        {/* Bulle Avatar */}
+        <View style={{ position: 'relative' }}>
+          <Image 
+            source={{ uri: item.image }} 
+            style={{ width: 70, height: 70, borderRadius: 35, borderWidth: 2, borderColor: '#2d203b' }} 
+          />
+          
+          <View style={{ 
+            position: 'absolute', 
+            bottom: 2, 
+            right: 2, 
+            backgroundColor: '#ef4444', 
+            width: 16, 
+            height: 16, 
+            borderRadius: 8, 
+            borderWidth: 2, 
+            borderColor: '#191121' 
+          }} />
         </View>
 
-        {/* CONTINUER À JOUER */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <MaterialIcons name="history" size={24} color={COLORS.primary} />
-            <Text style={styles.sectionTitle}>Recent Reaction</Text>
-          </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
-            <View style={styles.gameCardSmall}>
-              <Image source={{ uri: 'https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&w=300&q=80' }} style={styles.gameCardImage} />
-              <View style={styles.progressBarBg}><View style={[styles.progressBarFill, {width: '65%'}]} /></View>
-              <Text style={styles.gameTitleSmall}>Elden Echoes</Text>
-              <Text style={styles.gameSubtitleSmall}>65% Completed</Text>
-            </View>
-            <View style={styles.gameCardSmall}>
-              <Image source={{ uri: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=300&q=80' }} style={styles.gameCardImage} />
-              <View style={styles.progressBarBg}><View style={[styles.progressBarFill, {width: '12%'}]} /></View>
-              <Text style={styles.gameTitleSmall}>Velocity 2077</Text>
-              <Text style={styles.gameSubtitleSmall}>12% Completed</Text>
-            </View>
-          </ScrollView>
-        </View>
-
-        {/* POPULAR NOW - CONNECTÉ À L'API ! */}
-        <View style={styles.section}>
+        {/* Nom du jeu et Compteur */}
+        <Text style={{ color: 'white', fontWeight: 'bold', marginTop: 8, fontSize: 12 }}>
+          {item.game}
+        </Text>
+        <Text style={{ color: '#94a3b8', fontSize: 10 }}>
+          {item.usersCount} en ligne
+        </Text>
+      </TouchableOpacity>
+    )}
+  />
+</View>
+      {/* POPULAR NOW - CONNECTÉ À L'API ! */}
+    <View style={styles.section}>
           <View style={styles.sectionHeaderBetween}>
             <Text style={styles.sectionTitle}>Popular Now</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Games')}>
@@ -165,7 +329,70 @@ export default function HomeScreen({ navigation }) {
 )}
           </ScrollView>
         </View>
-        
+        {/* SECTION : INDUSTRY HEADLINES (News quotidiennes) */}
+<View style={{ marginTop: 20, paddingHorizontal: 20 }}>
+  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+    <Text style={styles.sectionTitle}>Industry Headlines 📰</Text>
+    <TouchableOpacity>
+      <Text style={{ color: '#94a3b8', fontSize: 12 }}>Voir tout</Text>
+    </TouchableOpacity>
+  </View>
+
+  {HEADLINES.map(news => (
+    <TouchableOpacity 
+      key={news.id} 
+      style={{ flexDirection: 'row', backgroundColor: '#1e1525', borderRadius: 12, padding: 10, marginBottom: 12, alignItems: 'center', borderWidth: 1, borderColor: '#2d203b' }}
+      activeOpacity={0.8}
+    >
+      <Image source={{ uri: news.image }} style={{ width: 80, height: 80, borderRadius: 8 }} />
+      <View style={{ marginLeft: 15, flex: 1 }}>
+        <Text style={{ color: '#9146FF', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>{news.source}</Text>
+        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14, marginTop: 4, lineHeight: 20 }} numberOfLines={2}>{news.title}</Text>
+        <Text style={{ color: '#94a3b8', fontSize: 11, marginTop: 6 }}>{news.time}</Text>
+      </View>
+    </TouchableOpacity>
+  ))}
+</View>
+
+{/*  SECTION : NEW RELEASES (Placeholder) */}
+{/*  on le branchera sur l'API RAWG plus tard */}
+<View style={{ marginTop: 20, paddingHorizontal: 20 }}>
+  <Text style={styles.sectionTitle}>New Releases ✨</Text>
+  <View style={{ backgroundColor: '#1e1525', borderRadius: 12, padding: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#2d203b', borderStyle: 'dashed', marginTop: 10 }}>
+    <Text style={{ color: '#94a3b8', textAlign: 'center' }}>Branchement API RAWG à venir...</Text>
+  </View>
+</View>
+
+{/*  SECTION : EXPLORATION & HALL OF FAME */}
+<View style={{ marginTop: 30, paddingHorizontal: 20, marginBottom: 40 }}>
+  <Text style={styles.sectionTitle}>Explore 🌍</Text>
+  
+  {/* Grille des Plateformes */}
+  <View style={{ flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap', marginTop: 15 }}>
+    {PLATFORMS.map(plat => (
+      <TouchableOpacity 
+        key={plat.id} 
+        style={{ backgroundColor: '#1e1525', width: '47%', padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 15, borderWidth: 1, borderColor: '#2d203b' }}
+        activeOpacity={0.7}
+      >
+        <Text style={{ fontSize: 24, marginBottom: 8 }}>{plat.icon}</Text>
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>{plat.name}</Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+
+  {/* Le  bouton Hall of Fame */}
+  <TouchableOpacity 
+    style={{ backgroundColor: 'rgba(234, 179, 8, 0.1)', borderWidth: 1, borderColor: '#eab308', borderRadius: 12, padding: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 5 }}
+    activeOpacity={0.8}
+  >
+    <Text style={{ fontSize: 28, marginRight: 15 }}>🏆</Text>
+    <View>
+      <Text style={{ color: '#eab308', fontWeight: 'bold', fontSize: 16, textTransform: 'uppercase', letterSpacing: 1 }}>2026 Hall of Fame</Text>
+      <Text style={{ color: '#94a3b8', fontSize: 12, marginTop: 4 }}>Les jeux les mieux notés de l'année</Text>
+    </View>
+  </TouchableOpacity>
+</View>
         <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
