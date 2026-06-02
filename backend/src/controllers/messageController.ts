@@ -169,3 +169,36 @@ export const deleteMessage = async (req: Request, res: Response) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+/**
+ * Toggle like on a message
+ */
+export const toggleLike = async (req: Request, res: Response) => {
+  try {
+    const { messageId } = req.params;
+    const result = await messageService.toggleLike(messageId, req.user!._id);
+
+    // Notifier les participants de la conversation
+    const Message = require('../models/Message').default;
+    const Conversation = require('../models/Conversation').default;
+
+    const message = await Message.findById(messageId);
+    if (message) {
+      const conversation = await Conversation.findById(message.conversation).populate('participants');
+      if (conversation) {
+        conversation.participants.forEach((participant: any) => {
+          io.to(`user_${participant._id}`).emit('message_liked', {
+            messageId,
+            userId: req.user!._id,
+            action: result.action,
+            likedAt: result.action === 'like' ? new Date() : undefined,
+          });
+        });
+      }
+    }
+
+    res.json(result.message);
+  } catch (error: any) {
+    res.status(error.statusCode || 400).json({ message: error.message });
+  }
+};

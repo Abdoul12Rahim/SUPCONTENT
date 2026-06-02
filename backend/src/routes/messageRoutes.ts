@@ -16,6 +16,7 @@ router.delete('/conversations/:conversationId', messageController.deleteConversa
 router.get('/conversations/:conversationId/messages', messageController.getMessages);
 router.post('/conversations/:conversationId/messages', messageController.sendMessage);
 router.put('/conversations/:conversationId/read', messageController.markAsRead);
+router.post('/messages/:messageId/like', messageController.toggleLike);
 router.delete('/messages/:messageId', messageController.deleteMessage);
 
 // Route pour le nombre de messages non lus

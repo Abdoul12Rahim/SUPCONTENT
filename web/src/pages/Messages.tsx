@@ -37,6 +37,7 @@ interface Message {
   };
   read: boolean;
   createdAt: string;
+  likedBy?: Array<{ user: string; likedAt?: string }>;
 }
 
 interface Conversation {
@@ -122,12 +123,35 @@ export const Messages = () => {
         fetchConversations();
       };
 
+      const handleMessageLiked = (data: { messageId: string; userId: string; action: 'like' | 'unlike'; likedAt?: string }) => {
+        // Mettre à jour le message dans la conversation active
+        setMessages((prev) =>
+          prev.map((m) => {
+            if (m._id !== data.messageId) return m;
+            const likedBy = Array.isArray(m.likedBy) ? [...m.likedBy] : [];
+            if (data.action === 'like') {
+              // éviter les doublons
+              if (!likedBy.some((l) => l.user === data.userId)) {
+                likedBy.push({ user: data.userId, likedAt: data.likedAt });
+              }
+            } else {
+              // unlike
+              const idx = likedBy.findIndex((l) => l.user === data.userId);
+              if (idx !== -1) likedBy.splice(idx, 1);
+            }
+            return { ...m, likedBy };
+          })
+        );
+      };
+
       socket.on('new_message', handleNewMessage);
       socket.on('message_deleted', handleMessageDeleted);
+      socket.on('message_liked', handleMessageLiked);
 
       return () => {
         socket.off('new_message', handleNewMessage);
         socket.off('message_deleted', handleMessageDeleted);
+        socket.off('message_liked', handleMessageLiked);
       };
     }
   }, [socket, isAuthenticated, selectedConversation]);
@@ -427,6 +451,8 @@ export const Messages = () => {
                   <VStack spacing={3} align="stretch">
                     {messages.map((message) => {
                       const isOwn = message.sender._id === user?._id;
+                      const currentUserLiked = message.likedBy?.some((l) => l.user === user?._id);
+                      const likesCount = message.likedBy?.length || 0;
                       return (
                         <Flex
                           key={message._id}
@@ -445,6 +471,27 @@ export const Messages = () => {
                               shadow="sm"
                               wordBreak="break-word"
                               whiteSpace="pre-wrap"
+                              onDoubleClick={async () => {
+                                try {
+                                  await api.post(`/messages/messages/${message._id}/like`);
+                                  // Optimistic UI: toggle locally
+                                  setMessages((prev) =>
+                                    prev.map((m) => {
+                                      if (m._id !== message._id) return m;
+                                      const likedBy = Array.isArray(m.likedBy) ? [...m.likedBy] : [];
+                                      const idx = likedBy.findIndex((l) => l.user === user?._id);
+                                      if (idx === -1) {
+                                        likedBy.push({ user: user?._id!, likedAt: new Date().toISOString() });
+                                      } else {
+                                        likedBy.splice(idx, 1);
+                                      }
+                                      return { ...m, likedBy };
+                                    })
+                                  );
+                                } catch (error) {
+                                  console.error('Erreur like:', error);
+                                }
+                              }}
                             >
                               <Text wordBreak="break-word" whiteSpace="pre-wrap">{message.content}</Text>
                               <Text
@@ -455,6 +502,14 @@ export const Messages = () => {
                               >
                                 {formatMessageTime(message.createdAt)}
                               </Text>
+                              {/* Like indicator */}
+                              <Flex mt={1} justify="flex-end" align="center" gap={2}>
+                                {likesCount > 0 && (
+                                  <Badge colorScheme={currentUserLiked ? 'pink' : 'gray'} borderRadius="full">
+                                    ❤️ {likesCount}
+                                  </Badge>
+                                )}
+                              </Flex>
                             </Box>
                             {isOwn && (
                               <IconButton

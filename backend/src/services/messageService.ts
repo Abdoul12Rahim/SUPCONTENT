@@ -206,6 +206,41 @@ export class MessageService {
   }
 
   /**
+   * Toggle like for a message by a user (like/unlike)
+   */
+  async toggleLike(messageId: string, userId: string): Promise<{ action: 'like' | 'unlike'; message: any }> {
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      throw new Error('Message non trouvé');
+    }
+
+    // Vérifier que l'utilisateur appartient bien à la conversation
+    const conversation = await Conversation.findOne({ _id: message.conversation, participants: userId });
+    if (!conversation) {
+      throw new Error('Accès non autorisé');
+    }
+
+    const alreadyLiked = message.likedBy && message.likedBy.some((l: any) => l.user.toString() === userId.toString());
+
+    let action: 'like' | 'unlike' = 'like';
+
+    if (alreadyLiked) {
+      // Retirer le like
+      await Message.updateOne({ _id: messageId }, { $pull: { likedBy: { user: userId } } });
+      action = 'unlike';
+    } else {
+      // Ajouter le like
+      await Message.updateOne({ _id: messageId }, { $push: { likedBy: { user: userId, likedAt: new Date() } } });
+      action = 'like';
+    }
+
+    const populated = await Message.findById(messageId).populate('sender', 'username displayName avatar').lean();
+
+    return { action, message: populated };
+  }
+
+  /**
    * Obtenir le nombre total de messages non lus
    */
   async getUnreadCount(userId: string): Promise<number> {
