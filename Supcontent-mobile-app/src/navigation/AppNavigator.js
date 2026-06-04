@@ -3,6 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import RegisterScreen from '../screens/RegisterScreen';
+import GameListScreen from '../screens/GameListScreen';
+import NewsListScreen from '../screens/NewsListScreen';
 import BottomNav from '../components/BottomNav';
 
 // les écrans
@@ -38,6 +40,8 @@ export default function AppNavigator() {
         <Stack.Screen name="MainTabs" component={MainTabs} />
         {/* La page de détails (qui n'aura pas la barre du bas) */}
         <Stack.Screen name="GameDetail" component={GameDetailScreen} />
+        <Stack.Screen name="GameListScreen" component={GameListScreen} />
+        <Stack.Screen name="NewsListScreen" component={NewsListScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
       </Stack.Navigator>
