@@ -1,6 +1,8 @@
 import Conversation from '../models/Conversation';
 import Message from '../models/Message';
 import User from '../models/User';
+import Follow from '../models/Follow';
+import HttpError from '../utils/httpError';
 import mongoose from 'mongoose';
 
 export class MessageService {
@@ -15,11 +17,11 @@ export class MessageService {
     ]);
 
     if (!user1 || !user2) {
-      throw new Error('Utilisateur non trouvé');
+      throw new HttpError(404, 'Utilisateur non trouvé');
     }
 
     if (userId1 === userId2) {
-      throw new Error('Impossible de créer une conversation avec soi-même');
+      throw new HttpError(400, 'Impossible de créer une conversation avec soi-même');
     }
 
     // Chercher une conversation existante (ordre des participants n'importe pas)
@@ -34,12 +36,32 @@ export class MessageService {
 
     // Si la conversation n'existe pas, la créer
     if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [userId1, userId2],
-      });
+      // Vérifier la règle de follow mutuel avant création
+      const follows = await Promise.all([
+        Follow.findOne({ follower: userId1, following: userId2 }),
+        Follow.findOne({ follower: userId2, following: userId1 }),
+      ]);
+
+      if (!follows[0] || !follows[1]) {
+        throw new HttpError(403, 'Conversation autorisée uniquement entre utilisateurs se suivant mutuellement');
+      }
+
+      conversation = await Conversation.create({ participants: [userId1, userId2] });
       conversation = await Conversation.findById(conversation._id)
         .populate('participants', 'username displayName avatar')
         .lean();
+    }
+
+    // Si la conversation existe, vérifier toujours la relation mutuelle
+    else {
+      const follows = await Promise.all([
+        Follow.findOne({ follower: userId1, following: userId2 }),
+        Follow.findOne({ follower: userId2, following: userId1 }),
+      ]);
+
+      if (!follows[0] || !follows[1]) {
+        throw new HttpError(403, 'Conversation non disponible — follow mutuel requis');
+      }
     }
 
     return conversation;
@@ -181,6 +203,41 @@ export class MessageService {
       },
       { read: true }
     );
+  }
+
+  /**
+   * Toggle like for a message by a user (like/unlike)
+   */
+  async toggleLike(messageId: string, userId: string): Promise<{ action: 'like' | 'unlike'; message: any }> {
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      throw new Error('Message non trouvé');
+    }
+
+    // Vérifier que l'utilisateur appartient bien à la conversation
+    const conversation = await Conversation.findOne({ _id: message.conversation, participants: userId });
+    if (!conversation) {
+      throw new Error('Accès non autorisé');
+    }
+
+    const alreadyLiked = message.likedBy && message.likedBy.some((l: any) => l.user.toString() === userId.toString());
+
+    let action: 'like' | 'unlike' = 'like';
+
+    if (alreadyLiked) {
+      // Retirer le like
+      await Message.updateOne({ _id: messageId }, { $pull: { likedBy: { user: userId } } });
+      action = 'unlike';
+    } else {
+      // Ajouter le like
+      await Message.updateOne({ _id: messageId }, { $push: { likedBy: { user: userId, likedAt: new Date() } } });
+      action = 'like';
+    }
+
+    const populated = await Message.findById(messageId).populate('sender', 'username displayName avatar').lean();
+
+    return { action, message: populated };
   }
 
   /**

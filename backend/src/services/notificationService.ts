@@ -7,15 +7,15 @@ export class NotificationService {
    */
   async createNotification(data: {
     user: string;
-    type: 'follow' | 'like' | 'comment' | 'recommendation';
+    type: 'follow' | 'like' | 'comment' | 'message' | 'recommendation';
     from: string;
     reference?: string;
     message: string;
   }): Promise<INotification> {
     const notification = await Notification.create(data);
 
-    // Émettre la notification en temps réel via WebSocket
-    io.to(data.user).emit('new_notification', notification);
+    // Émettre dans la room utilisateur (même convention que socket.join dans app.ts)
+    io.to(`user_${data.user}`).emit('new_notification', notification);
 
     return notification;
   }
@@ -27,7 +27,7 @@ export class NotificationService {
     userId: string,
     page: number = 1,
     limit: number = 20,
-    type?: 'follow' | 'like' | 'comment' | 'recommendation'
+    type?: 'follow' | 'like' | 'comment' | 'message' | 'recommendation'
   ): Promise<{ notifications: INotification[]; total: number; page: number; totalPages: number }> {
     const skip = (page - 1) * limit;
 

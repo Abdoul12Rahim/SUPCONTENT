@@ -1,10 +1,15 @@
 import express from 'express';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { authMiddleware, optionalAuth } from '../middleware/authMiddleware';
 import * as listController from '../controllers/listController';
 
 const router = express.Router();
 
-// Toutes les routes nécessitent l'authentification
+// Routes publiques
+router.get('/public', optionalAuth, listController.getPublicLists);
+router.get('/public/user/:userId', optionalAuth, listController.getUserPublicLists);
+router.get('/public/:listId', optionalAuth, listController.getPublicListById);
+
+// Routes privées (authentifiées)
 router.use(authMiddleware);
 
 // Gestion des listes

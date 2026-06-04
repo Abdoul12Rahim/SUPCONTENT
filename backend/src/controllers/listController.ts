@@ -2,6 +2,81 @@ import { Request, Response } from 'express';
 import List from '../models/List';
 import Content from '../models/Content';
 
+// Obtenir les listes publiques (avec recherche optionnelle)
+export const getPublicLists = async (req: Request, res: Response) => {
+  try {
+    const { q = '', page = '1', limit = '20' } = req.query;
+    const pageNumber = Math.max(1, parseInt(page as string, 10) || 1);
+    const pageSize = Math.min(50, Math.max(1, parseInt(limit as string, 10) || 20));
+
+    const query: any = { isPublic: true };
+    const searchQuery = (q as string).trim();
+
+    if (searchQuery) {
+      query.$or = [
+        { name: { $regex: searchQuery, $options: 'i' } },
+        { description: { $regex: searchQuery, $options: 'i' } },
+      ];
+    }
+
+    const [lists, total] = await Promise.all([
+      List.find(query)
+        .populate('user', 'username avatar')
+        .populate('items', 'title slug backgroundImage externalId rating genres')
+        .sort({ updatedAt: -1 })
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize),
+      List.countDocuments(query),
+    ]);
+
+    res.json({
+      lists,
+      pagination: {
+        page: pageNumber,
+        limit: pageSize,
+        total,
+        hasNext: pageNumber * pageSize < total,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Obtenir les listes publiques d'un utilisateur
+export const getUserPublicLists = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const lists = await List.find({ user: userId, isPublic: true })
+      .populate('items', 'title slug backgroundImage externalId rating genres')
+      .sort({ updatedAt: -1 });
+
+    res.json({ lists });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Obtenir le détail d'une liste publique
+export const getPublicListById = async (req: Request, res: Response) => {
+  try {
+    const { listId } = req.params;
+
+    const list = await List.findOne({ _id: listId, isPublic: true })
+      .populate('user', 'username avatar')
+      .populate('items', 'title slug backgroundImage externalId rating genres');
+
+    if (!list) {
+      return res.status(404).json({ message: 'Liste publique non trouvée' });
+    }
+
+    res.json(list);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Créer une liste personnelle
 export const createList = async (req: Request, res: Response) => {
   try {

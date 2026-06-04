@@ -28,7 +28,7 @@ export const getOrCreateConversation = async (req: Request, res: Response) => {
     const conversation = await messageService.getOrCreateConversation(req.user!._id, userId);
     res.json(conversation);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -46,7 +46,7 @@ export const getMessages = async (req: Request, res: Response) => {
     );
     res.json(result);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -75,7 +75,7 @@ export const sendMessage = async (req: Request, res: Response) => {
     if (otherParticipant) {
       await notificationService.createNotification({
         user: otherParticipant._id,
-        type: 'comment', // Utiliser 'comment' car 'message' n'est pas dans le type
+        type: 'message',
         from: req.user!._id,
         reference: conversationId,
         message: `${req.user!.displayName || req.user!.username} vous a envoyé un message`,
@@ -90,7 +90,7 @@ export const sendMessage = async (req: Request, res: Response) => {
 
     res.status(201).json(message);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -103,7 +103,7 @@ export const markAsRead = async (req: Request, res: Response) => {
     await messageService.markMessagesAsRead(conversationId, req.user!._id);
     res.json({ message: 'Messages marqués comme lus' });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -115,7 +115,7 @@ export const getUnreadCount = async (req: Request, res: Response) => {
     const count = await messageService.getUnreadCount(req.user!._id);
     res.json({ count });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message });
   }
 };
 
@@ -128,7 +128,7 @@ export const deleteConversation = async (req: Request, res: Response) => {
     await messageService.deleteConversation(conversationId, req.user!._id);
     res.json({ message: 'Conversation supprimée' });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
 
@@ -167,5 +167,38 @@ export const deleteMessage = async (req: Request, res: Response) => {
     res.json({ message: 'Message supprimé' });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+/**
+ * Toggle like on a message
+ */
+export const toggleLike = async (req: Request, res: Response) => {
+  try {
+    const { messageId } = req.params;
+    const result = await messageService.toggleLike(messageId, req.user!._id);
+
+    // Notifier les participants de la conversation
+    const Message = require('../models/Message').default;
+    const Conversation = require('../models/Conversation').default;
+
+    const message = await Message.findById(messageId);
+    if (message) {
+      const conversation = await Conversation.findById(message.conversation).populate('participants');
+      if (conversation) {
+        conversation.participants.forEach((participant: any) => {
+          io.to(`user_${participant._id}`).emit('message_liked', {
+            messageId,
+            userId: req.user!._id,
+            action: result.action,
+            likedAt: result.action === 'like' ? new Date() : undefined,
+          });
+        });
+      }
+    }
+
+    res.json(result.message);
+  } catch (error: any) {
+    res.status(error.statusCode || 400).json({ message: error.message });
   }
 };
