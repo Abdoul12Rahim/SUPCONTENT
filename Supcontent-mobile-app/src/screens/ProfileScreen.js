@@ -20,11 +20,12 @@ const COLORS = {
 };
 
 export default function ProfileScreen({ navigation, route }) {
-
+ /*
+ Utuliser le code si vous n'arrive pas a vous connecter ou pour le développement du design, MAIS à retirer une fois que le design est validé pour tester avec les vraies données du contexte
   // 1. On récupère le contexte, MAIS on ne déstructure pas tout de suite
   const auth = useContext(AuthContext);
   
-  // 🛠️ 2. LE COURT-CIRCUIT DE DÉVELOPPEMENT 
+  // 2. LE COURT-CIRCUIT DE DÉVELOPPEMENT 
   // On force la connexion à "true"
   const isLoggedIn = true; 
   
@@ -39,9 +40,9 @@ export default function ProfileScreen({ navigation, route }) {
   // On récupère tes fonctions normales pour ne rien casser
   const logout = auth.logout;
   const updateUser = auth.updateUser;
-
-   // a rempplacer par les vraies données du contexte une fois le design validé
-  //const { isLoggedIn, user, logout, updateUser } = useContext(AuthContext);
+*/
+  
+  const { isLoggedIn, user, logout, updateUser } = useContext(AuthContext);
   const insets = useSafeAreaInsets();
   const isMyProfile = !route.params?.userId;
 

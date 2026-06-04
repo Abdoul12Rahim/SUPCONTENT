@@ -10,6 +10,9 @@ router.get('/popular', optionalAuth, contentController.getPopular);
 router.get('/new', optionalAuth, contentController.getNewReleases);
 router.get('/upcoming', optionalAuth, contentController.getUpcoming);
 router.get('/genre/:genre', optionalAuth, contentController.getByGenre);
+router.get('/headlines', optionalAuth, contentController.getHeadlines);
+router.get('/platform/:platformId', optionalAuth, contentController.getGamesByPlatform);
+router.get('/halloffame', optionalAuth, contentController.getHallOfFame);
 router.get('/:id', optionalAuth, contentController.getGameDetails);
 
 export default router;
