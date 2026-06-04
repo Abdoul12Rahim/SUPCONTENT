@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import contentService from '../services/contentService';
 import externalApiService from '../services/externalApiService';
+import axios from 'axios';
 
 export const searchGames = async (req: Request, res: Response) => {
   try {
@@ -20,14 +21,14 @@ export const getGameDetails = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
-    // Détecter si c'est un ID numérique ou un slug
+
     const isNumericId = /^\d+$/.test(id);
     
     if (isNumericId) {
       const game = await contentService.getGameDetails(parseInt(id));
       res.json(game);
     } else {
-      // Si c'est un slug, récupérer par slug
+     
       const game = await contentService.getGameBySlug(id);
       res.json(game);
     }
@@ -65,7 +66,40 @@ export const getUpcoming = async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 };
+export const getHeadlines = async (req: Request, res: Response) => {
+  try {
+    
+    const apiKey = process.env.NEWS_API_KEY;
+    
+    const response = await axios.get(`https://newsapi.org/v2/everything?q=jeux+video&language=fr&sortBy=publishedAt&apiKey=${apiKey}`);
+    res.json(response.data.articles);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
+export const getGamesByPlatform = async (req: Request, res: Response) => {
+  try {
+    const { platformId } = req.params;
+    const { page = 1 } = req.query;
+    // On délègue le travail au service, comme pour getNewReleases
+    const result = await externalApiService.getGamesByPlatform(platformId, parseInt(page as string));
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getHallOfFame = async (req: Request, res: Response) => {
+  try {
+    const { page = 1 } = req.query;
+    // On délègue le travail au service
+    const result = await externalApiService.getHallOfFame(parseInt(page as string));
+    res.json(result);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
 export const getByGenre = async (req: Request, res: Response) => {
   try {
     const { genre } = req.params;

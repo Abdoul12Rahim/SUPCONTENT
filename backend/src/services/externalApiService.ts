@@ -242,6 +242,25 @@ export class ExternalApiService {
       ordering: 'released',
     });
   }
+  /**
+   * Récupère les jeux par plateforme (PC, PS, Xbox, Switch)
+   */
+  async getGamesByPlatform(platformId: string, page: number = 1, pageSize: number = 20): Promise<any> {
+    return this.searchGames('', page, pageSize, {
+      platforms: platformId,
+      ordering: '-added',
+    });
+  }
+
+  /**
+   * Récupère le Hall of Fame 2026
+   */
+  async getHallOfFame(page: number = 1, pageSize: number = 20): Promise<any> {
+    return this.searchGames('', page, pageSize, {
+      dates: '2025-01-01,2026-12-31',
+      ordering: '-rating',
+    });
+  }
 }
 
 export default new ExternalApiService();
