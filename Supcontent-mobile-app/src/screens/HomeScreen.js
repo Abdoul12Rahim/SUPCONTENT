@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import {
   StyleSheet, Text, View, ScrollView, Image, FlatList,
   TouchableOpacity, Linking, ActivityIndicator, Dimensions
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { contentAPI, dealsAPI, socialAPI, newsAPI } from '../services/api';
+import { contentAPI, socialAPI, newsAPI, dealsAPI } from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuthContext } from '../context/AuthContext';
 
 const COLORS = {
   primary: '#7c3aed',
@@ -25,84 +26,126 @@ const { width } = Dimensions.get('window');
 const CARD_WIDTH = width - 40;
 const SPACING = 12;
 
+// Fallback uniquement si le backend ne répond pas
 const FALLBACK_EVENTS = [
   { id: '1', title: "Call of Duty League 2026 - Major Championship", category: "TOURNOI E-SPORT", status: "🔴 EN DIRECT", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80", url: "https://www.twitch.tv/callofduty" },
   { id: '2', title: "PlayStation Showcase : Les sorties de la rentrée", category: "CONFÉRENCE", status: "CE SOIR 20H", image: "https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&w=800&q=80", url: "https://www.youtube.com/playstation" },
   { id: '3', title: "Elden Ring - World Record Speedrun Attempt", category: "SPEEDRUN", status: "🔴 EN DIRECT", image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=800&q=80", url: "https://www.twitch.tv" },
-  { id: '4', title: "Global Game Jam 2026 - Finales", category: "INDIE DEV", status: "DEMAIN 14H", image: "https://images.unsplash.com/photo-1505506874110-6a7a6c9924cb?auto=format&fit=crop&w=800&q=80", url: "https://globalgamejam.org" },
 ];
 
-const ACTIVE_ROOMS = [
+const FALLBACK_ROOMS = [
   { id: '101', game: "GTA VI", usersCount: 142, image: "https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&w=200&q=80" },
   { id: '102', game: "Valorant", usersCount: 89, image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200&q=80" },
   { id: '103', game: "Elden Ring", usersCount: 56, image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=200&q=80" },
   { id: '104', game: "Fortnite", usersCount: 204, image: "https://images.unsplash.com/photo-1505506874110-6a7a6c9924cb?auto=format&fit=crop&w=200&q=80" },
-  { id: '105', game: "Minecraft", usersCount: 73, image: "https://images.unsplash.com/photo-1605901309584-818e25960b8f?auto=format&fit=crop&w=200&q=80" },
 ];
 
 export default function HomeScreen({ navigation }) {
+  const { user, isLoggedIn } = useContext(AuthContext);
   const [popularGames, setPopularGames] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [events, setEvents] = useState(FALLBACK_EVENTS);
   const [newReleases, setNewReleases] = useState([]);
-  const flatListRef = useRef(null);
-  const [activeRooms, setActiveRooms] = useState([]);
+  const [activeRooms, setActiveRooms] = useState(FALLBACK_ROOMS);
   const [headlines, setHeadlines] = useState([]);
+  const flatListRef = useRef(null);
 
+  // Auto-scroll events
   useEffect(() => {
     if (events.length === 0) return;
     let currentIndex = 0;
     const timer = setInterval(() => {
       currentIndex = (currentIndex + 1) % events.length;
-      flatListRef.current?.scrollToOffset({ offset: currentIndex * (CARD_WIDTH + SPACING), animated: true });
+      flatListRef.current?.scrollToOffset({
+        offset: currentIndex * (CARD_WIDTH + SPACING),
+        animated: true,
+      });
     }, 3500);
     return () => clearInterval(timer);
   }, [events]);
 
   useEffect(() => {
-    const fetchHomeData = async () => {
-      try {
-        setIsLoading(true);
-        const results = await Promise.allSettled([
-          contentAPI.getPopular(1),
-          dealsAPI.getTopDeals(),
-          contentAPI.getNewReleases(),
-          socialAPI.getActiveRooms(),
-          socialAPI.getEvents(),
-          newsAPI.getHeadlines()
-        ]);
-        if (results[0].status === 'fulfilled') {
-          const data = results[0].value.data;
-          const list = data.results || data;
-          setPopularGames(Array.isArray(list) ? list.slice(0, 5) : []);
-        }
-        if (results[2].status === 'fulfilled') {
-          const data = results[2].value.data;
-          const list = data.results || data;
-          setNewReleases(Array.isArray(list) ? list.slice(0, 5) : []);
-        }
-        if (results[3].status === 'fulfilled') setActiveRooms(results[3].value.data);
-        if (results[4].status === 'fulfilled') {
-          const data = results[4].value.data;
-          const list = data.results || data;
-          if (Array.isArray(list) && list.length > 0) setEvents(list.slice(0, 5));
-        }
-        if (results[5].status === 'fulfilled') {
-          setHeadlines((results[5].value.data || []).slice(0, 4));
-        }
-      } catch (error) {
-        console.log("Erreur:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchHomeData();
   }, []);
 
-  const displayRooms = activeRooms.length > 0 ? activeRooms : ACTIVE_ROOMS;
+  const fetchHomeData = async () => {
+    try {
+      setIsLoading(true);
+      const results = await Promise.allSettled([
+        contentAPI.getPopular(1),        
+        contentAPI.getNewReleases(1),    
+        socialAPI.getActiveRooms(),      
+        socialAPI.getEvents(),          
+        newsAPI.getHeadlines(),         
+        dealsAPI.getTopDeals(),         
+      ]);
+
+      // [0] Jeux populaires
+      if (results[0].status === 'fulfilled') {
+        const data = results[0].value.data;
+        const list = data.results || data;
+        setPopularGames(Array.isArray(list) ? list.slice(0, 5) : []);
+      }
+
+      // [1] Nouveautés
+      // Même structure que popular
+      if (results[1].status === 'fulfilled') {
+        const data = results[1].value.data;
+        const list = data.results || data;
+        setNewReleases(Array.isArray(list) ? list.slice(0, 8) : []);
+      }
+
+      // [2] Salons actifs
+      // Structure backend : [{ _id, game, usersCount, image }] ou fallback
+      if (results[2].status === 'fulfilled') {
+        const data = results[2].value.data;
+        if (Array.isArray(data) && data.length > 0) {
+          setActiveRooms(data);
+        }
+        
+      }
+
+      // [3] Événements live/upcoming
+      // Structure backend : [{ _id, title, category, status, image, url }]
+      if (results[3].status === 'fulfilled') {
+        const data = results[3].value.data;
+        const list = data.results || data;
+        if (Array.isArray(list) && list.length > 0) {
+          setEvents(list.slice(0, 5));
+        }
+        // sinon on garde FALLBACK_EVENTS
+      }
+
+      // [4] News/Headlines
+      // Structure backend : [{ _id, title, source, image, url, publishedAt }]
+      // ou format NewsAPI : [{ title, source: { name }, urlToImage, url, publishedAt }]
+      if (results[4].status === 'fulfilled') {
+        const data = results[4].value.data;
+        const list = Array.isArray(data) ? data : data.articles || [];
+        setHeadlines(list.slice(0, 4));
+      }
+
+    } catch (error) {
+      console.log('Erreur fetchHomeData:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Normalise l'image d'un jeu (backend peut renvoyer backgroundImage ou background_image)
+  const getGameImage = (game) =>
+    game?.backgroundImage || game?.background_image || 'https://via.placeholder.com/500x300';
+
+  // Normalise le titre
+  const getGameTitle = (game) => game?.title || game?.name || 'Titre inconnu';
+
+  // Normalise l'image d'une news
+  const getNewsImage = (news) =>
+    news?.image || news?.urlToImage || news?.thumbnail || 'https://via.placeholder.com/80';
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <View style={styles.logoIconBg}>
@@ -110,11 +153,17 @@ export default function HomeScreen({ navigation }) {
           </View>
           <Text style={styles.logoText}>SUPCONTENT</Text>
         </View>
+        {/* Salutation si connecté */}
+        {isLoggedIn && user && (
+          <Text style={styles.greetingText}>
+            Salut, {user.displayName || user.username} 👋
+          </Text>
+        )}
       </View>
 
       <ScrollView style={styles.mainScroll} showsVerticalScrollIndicator={false}>
 
-        {/* LIVE & UPCOMING EVENTS */}
+        {/* ── LIVE & UPCOMING EVENTS ── */}
         <View style={{ marginTop: 20 }}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Live & Upcoming</Text>
@@ -128,7 +177,9 @@ export default function HomeScreen({ navigation }) {
             horizontal
             showsHorizontalScrollIndicator={false}
             data={events}
-            keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+            keyExtractor={(item, index) =>
+              item._id?.toString() || item.id?.toString() || index.toString()
+            }
             snapToInterval={CARD_WIDTH + SPACING}
             snapToAlignment="start"
             decelerationRate="fast"
@@ -142,13 +193,15 @@ export default function HomeScreen({ navigation }) {
               >
                 <View style={styles.eventCard}>
                   <Image
-                    source={{ uri: item.image || item.backgroundImage || item.background_image }}
+                    source={{ uri: item.image || item.backgroundImage || item.background_image || 'https://via.placeholder.com/800x400' }}
                     style={styles.eventImage}
                     resizeMode="cover"
                   />
                   <View style={styles.eventOverlay}>
                     <View style={[styles.statusBadge, {
-                      backgroundColor: (item.status || '').includes('DIRECT') ? 'rgba(239,68,68,0.9)' : 'rgba(59,130,246,0.85)'
+                      backgroundColor: (item.status || '').includes('DIRECT')
+                        ? 'rgba(239,68,68,0.9)'
+                        : 'rgba(59,130,246,0.85)'
                     }]}>
                       <Text style={styles.statusBadgeText}>{item.status || 'EVENT'}</Text>
                     </View>
@@ -156,7 +209,13 @@ export default function HomeScreen({ navigation }) {
                     <Text style={styles.eventTitle} numberOfLines={2}>{item.title}</Text>
                     <TouchableOpacity
                       style={styles.joinBtn}
-                      onPress={() => navigation.navigate('GameDetail', { id: item.externalId || item.id })}
+                      onPress={() => {
+                        if (item.externalId || item.gameId) {
+                          navigation.navigate('GameDetail', { id: item.externalId || item.gameId });
+                        } else if (item.url) {
+                          Linking.openURL(item.url);
+                        }
+                      }}
                     >
                       <Text style={styles.joinBtnText}>Rejoindre</Text>
                       <MaterialIcons name="arrow-forward" size={16} color="white" />
@@ -168,7 +227,7 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* SALONS ACTIFS */}
+        {/* ── SALONS ACTIFS ── */}
         <View style={{ marginTop: 32 }}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Salons Actifs</Text>
@@ -179,27 +238,33 @@ export default function HomeScreen({ navigation }) {
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={displayRooms}
-            keyExtractor={(item) => item.id}
+            data={activeRooms}
+            keyExtractor={(item) => item._id?.toString() || item.id?.toString()}
             contentContainerStyle={{ paddingHorizontal: 20 }}
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.roomItem}
                 activeOpacity={0.8}
-                onPress={() => navigation.navigate('Rooms', { roomId: item.id, game: item.game })}
+                onPress={() => navigation.navigate('Rooms', {
+                  roomId: item._id || item.id,
+                  game: item.game,
+                })}
               >
                 <View style={styles.roomAvatarWrap}>
-                  <Image source={{ uri: item.image }} style={styles.roomAvatar} />
+                  <Image
+                    source={{ uri: item.image || 'https://via.placeholder.com/200' }}
+                    style={styles.roomAvatar}
+                  />
                   <View style={styles.roomOnlineDot} />
                 </View>
                 <Text style={styles.roomGameName} numberOfLines={1}>{item.game}</Text>
-                <Text style={styles.roomCount}>{item.usersCount} en ligne</Text>
+                <Text style={styles.roomCount}>{item.usersCount || 0} en ligne</Text>
               </TouchableOpacity>
             )}
           />
         </View>
 
-        {/* POPULAR NOW */}
+        {/* ── POPULAR NOW ── */}
         <View style={{ marginTop: 32 }}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Popular Now</Text>
@@ -207,7 +272,11 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.seeAll}>View all</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20 }}
+          >
             {isLoading ? (
               <View style={{ width: 280, height: 180, justifyContent: 'center', alignItems: 'center' }}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
@@ -215,32 +284,46 @@ export default function HomeScreen({ navigation }) {
             ) : popularGames.length > 0 ? (
               popularGames.map((game, index) => (
                 <TouchableOpacity
-                  key={game.externalId ? game.externalId.toString() : index.toString()}
+                  key={game._id?.toString() || game.externalId?.toString() || index.toString()}
                   style={styles.popularCard}
-                  onPress={() => navigation.navigate('GameDetail', { gameId: game.externalId })}
+                  onPress={() => navigation.navigate('GameDetail', {
+                    gameId: game.externalId || game._id,
+                  })}
                 >
-                  <Image source={{ uri: game.backgroundImage || game.background_image || 'https://via.placeholder.com/500x300' }} style={styles.popularImage} />
+                  <Image
+                    source={{ uri: getGameImage(game) }}
+                    style={styles.popularImage}
+                  />
                   <View style={styles.popularOverlay}>
                     <View style={styles.popularRating}>
                       <MaterialIcons name="star" size={12} color="#facc15" />
-                      <Text style={styles.popularRatingText}>{game.rating || 'N/A'}</Text>
+                      <Text style={styles.popularRatingText}>
+                        {game.rating ? parseFloat(game.rating).toFixed(1) : 'N/A'}
+                      </Text>
                     </View>
                   </View>
                   <View style={styles.popularInfo}>
-                    <Text style={styles.popularTitle} numberOfLines={1}>{game.title || game.name}</Text>
-                    <Text style={styles.popularSub}>{game.ratingsCount ? `${game.ratingsCount} avis` : 'Trending'}</Text>
+                    <Text style={styles.popularTitle} numberOfLines={1}>
+                      {getGameTitle(game)}
+                    </Text>
+                    <Text style={styles.popularSub}>
+                      {game.ratingsCount
+                        ? `${game.ratingsCount.toLocaleString()} avis`
+                        : 'Trending'}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               ))
             ) : (
               <View style={styles.emptyState}>
-                <Text style={{ color: COLORS.textMuted }}>Serveur hors-ligne</Text>
+                <MaterialIcons name="wifi-off" size={24} color={COLORS.textMuted} />
+                <Text style={{ color: COLORS.textMuted, marginTop: 8 }}>Serveur hors-ligne</Text>
               </View>
             )}
           </ScrollView>
         </View>
 
-        {/* INDUSTRY HEADLINES */}
+        {/* ── INDUSTRY HEADLINES ── */}
         <View style={{ marginTop: 32, paddingHorizontal: 20 }}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Industry News</Text>
@@ -248,63 +331,97 @@ export default function HomeScreen({ navigation }) {
               <Text style={styles.seeAll}>Voir tout</Text>
             </TouchableOpacity>
           </View>
-          {headlines && headlines.length > 0 ? headlines.map((news, index) => (
-            <TouchableOpacity
-              key={news.id || index.toString()}
-              style={styles.newsCard}
-              activeOpacity={0.8}
-              onPress={() => news.url && Linking.openURL(news.url)}
-            >
-              <Image source={{ uri: news.image || news.urlToImage || 'https://via.placeholder.com/80' }} style={styles.newsImage} />
-              <View style={styles.newsContent}>
-                <Text style={styles.newsSource}>{news.source?.name || news.source || 'News'}</Text>
-                <Text style={styles.newsTitle} numberOfLines={2}>{news.title}</Text>
-                <Text style={styles.newsDate}>
-                  {news.publishedAt ? new Date(news.publishedAt).toLocaleDateString('fr-FR') : (news.time || "Aujourd'hui")}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )) : (
+          {headlines.length > 0 ? (
+            headlines.map((news, index) => (
+              <TouchableOpacity
+                key={news._id?.toString() || news.id?.toString() || index.toString()}
+                style={styles.newsCard}
+                activeOpacity={0.8}
+                onPress={() => news.url && Linking.openURL(news.url)}
+              >
+                <Image
+                  source={{ uri: getNewsImage(news) }}
+                  style={styles.newsImage}
+                />
+                <View style={styles.newsContent}>
+                  <Text style={styles.newsSource}>
+                    {/* Backend ou NewsAPI */}
+                    {typeof news.source === 'string'
+                      ? news.source
+                      : news.source?.name || 'News'}
+                  </Text>
+                  <Text style={styles.newsTitle} numberOfLines={2}>{news.title}</Text>
+                  <Text style={styles.newsDate}>
+                    {news.publishedAt
+                      ? new Date(news.publishedAt).toLocaleDateString('fr-FR')
+                      : news.time || "Aujourd'hui"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
             <View style={styles.emptyState}>
-              <Text style={{ color: COLORS.textMuted }}>Chargement des actualités...</Text>
+              <Text style={{ color: COLORS.textMuted }}>
+                {isLoading ? 'Chargement...' : 'Aucune actualité disponible.'}
+              </Text>
             </View>
           )}
         </View>
 
-        {/* NEW RELEASES */}
+        {/* ── NEW RELEASES ── */}
         <View style={{ marginTop: 32 }}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>New Releases ✨</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('GameListScreen', { type: 'newreleases', title: 'Nouveautés' })}>
+            <TouchableOpacity onPress={() => navigation.navigate('GameListScreen', {
+              type: 'newreleases', title: 'Nouveautés',
+            })}>
               <Text style={styles.seeAll}>Voir tout</Text>
             </TouchableOpacity>
           </View>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={newReleases}
-            keyExtractor={(item) => item.externalId ? item.externalId.toString() : Math.random().toString()}
-            contentContainerStyle={{ paddingHorizontal: 20 }}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.releaseCard}
-                activeOpacity={0.8}
-                onPress={() => navigation.navigate('GameDetail', { id: item.externalId || item.id })}
-              >
-                <Image
-                  source={{ uri: item.backgroundImage || item.background_image || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=200&q=80' }}
-                  style={styles.releaseImage}
-                />
-                <Text style={styles.releaseTitle} numberOfLines={1}>{item.title || item.name}</Text>
-                <Text style={styles.releaseDate}>
-                  {item.released ? new Date(item.released).toLocaleDateString('fr-FR') : 'Date inconnue'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
+          {newReleases.length > 0 ? (
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={newReleases}
+              keyExtractor={(item, index) =>
+                item._id?.toString() || item.externalId?.toString() || index.toString()
+              }
+              contentContainerStyle={{ paddingHorizontal: 20 }}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.releaseCard}
+                  activeOpacity={0.8}
+                  onPress={() => navigation.navigate('GameDetail', {
+                    id: item.externalId || item._id,
+                  })}
+                >
+                  <Image
+                    source={{ uri: getGameImage(item) }}
+                    style={styles.releaseImage}
+                  />
+                  <Text style={styles.releaseTitle} numberOfLines={1}>
+                    {getGameTitle(item)}
+                  </Text>
+                  <Text style={styles.releaseDate}>
+                    {item.released
+                      ? new Date(item.released).toLocaleDateString('fr-FR')
+                      : item.releaseDate
+                        ? new Date(item.releaseDate).toLocaleDateString('fr-FR')
+                        : 'Date inconnue'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          ) : (
+            !isLoading && (
+              <View style={styles.emptyState}>
+                <Text style={{ color: COLORS.textMuted }}>Aucune nouveauté disponible.</Text>
+              </View>
+            )
+          )}
         </View>
 
-        {/* EXPLORE */}
+        {/* ── EXPLORER PAR PLATEFORME ── */}
         <View style={{ marginTop: 32, paddingHorizontal: 20, marginBottom: 40 }}>
           <Text style={[styles.sectionTitle, { marginBottom: 14 }]}>Explorer</Text>
           <View style={styles.platformGrid}>
@@ -312,13 +429,17 @@ export default function HomeScreen({ navigation }) {
               { id: 4, name: 'PC', icon: '🖥️' },
               { id: 187, name: 'PlayStation', icon: '🎮' },
               { id: 186, name: 'Xbox', icon: '🟢' },
-              { id: 7, name: 'Switch', icon: '🕹️' }
+              { id: 7, name: 'Switch', icon: '🕹️' },
             ].map(plat => (
               <TouchableOpacity
                 key={plat.id}
                 style={styles.platformCard}
                 activeOpacity={0.7}
-                onPress={() => navigation.navigate('GameListScreen', { type: 'platform', platformId: plat.id, title: plat.name })}
+                onPress={() => navigation.navigate('GameListScreen', {
+                  type: 'platform',
+                  platformId: plat.id,
+                  title: plat.name,
+                })}
               >
                 <Text style={{ fontSize: 26, marginBottom: 6 }}>{plat.icon}</Text>
                 <Text style={styles.platformName}>{plat.name}</Text>
@@ -343,6 +464,7 @@ const styles = StyleSheet.create({
   logoContainer: { flexDirection: 'row', alignItems: 'center' },
   logoIconBg: { backgroundColor: COLORS.primary, padding: 7, borderRadius: 10, marginRight: 10 },
   logoText: { color: COLORS.textLight, fontSize: 17, fontWeight: '800', letterSpacing: 1.5 },
+  greetingText: { color: COLORS.textMuted, fontSize: 13, fontWeight: '500' },
   mainScroll: { flex: 1 },
   sectionHeaderRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
@@ -360,8 +482,7 @@ const styles = StyleSheet.create({
   livePillText: { color: '#ef4444', fontSize: 10, fontWeight: '700', letterSpacing: 0.8 },
   eventCard: {
     height: 210, borderRadius: 18, overflow: 'hidden',
-    borderWidth: 1, borderColor: COLORS.border,
-    backgroundColor: COLORS.surface,
+    borderWidth: 1, borderColor: COLORS.border, backgroundColor: COLORS.surface,
   },
   eventImage: { width: '100%', height: '100%', position: 'absolute' },
   eventOverlay: {
@@ -382,9 +503,8 @@ const styles = StyleSheet.create({
   },
   joinBtnText: { color: 'white', fontWeight: '700', fontSize: 13 },
   emptyState: {
-    marginHorizontal: 20, padding: 20, alignItems: 'center',
-    backgroundColor: COLORS.surface, borderRadius: 14,
-    borderWidth: 1, borderColor: COLORS.border,
+    padding: 24, alignItems: 'center', backgroundColor: COLORS.surface,
+    borderRadius: 14, borderWidth: 1, borderColor: COLORS.border, marginHorizontal: 4,
   },
   roomItem: { alignItems: 'center', marginRight: 18, width: 72 },
   roomAvatarWrap: { position: 'relative', marginBottom: 8 },
