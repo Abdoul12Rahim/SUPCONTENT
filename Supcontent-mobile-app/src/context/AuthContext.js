@@ -10,7 +10,6 @@ export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  
   useEffect(() => {
     checkToken();
   }, []);
@@ -20,16 +19,25 @@ export function AuthProvider({ children }) {
       const token = await AsyncStorage.getItem('userToken');
       if (token) {
         setUserToken(token);
-        // Récupère les infos utilisateur depuis le backend
+        // Charge d'abord le cache local pour affichage immédiat
+        try {
+          const cached = await AsyncStorage.getItem('userData');
+          if (cached) setUser(JSON.parse(cached));
+        } catch (e) {}
+
+        // Puis recharge depuis le backend
         try {
           const response = await authAPI.getMe();
-          setUser(response.data);
+          const freshUser = response.data;
+          setUser(freshUser);
           setIsLoggedIn(true);
+          await AsyncStorage.setItem('userData', JSON.stringify(freshUser));
         } catch (e) {
-          // Token expiré ou invalide → déconnecte proprement
-          console.log('Token invalide, déconnexion:', e.message);
+          console.log('Token invalide:', e.message);
           await AsyncStorage.removeItem('userToken');
+          await AsyncStorage.removeItem('userData');
           setUserToken(null);
+          setUser(null);
           setIsLoggedIn(false);
         }
       }
@@ -43,40 +51,45 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const response = await authAPI.login({ email, password });
-      // Backend renvoie { user, token }
       const { token, user: userData } = response.data;
       await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
       setUserToken(token);
       setUser(userData);
       setIsLoggedIn(true);
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || 'Email ou mot de passe incorrect';
-      return { success: false, message };
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Email ou mot de passe incorrect',
+      };
     }
   };
 
   const register = async (username, email, password) => {
     try {
       const response = await authAPI.register({ username, email, password });
-      // Backend renvoie { user, token }
       const { token, user: userData } = response.data;
       await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
       setUserToken(token);
       setUser(userData);
       setIsLoggedIn(true);
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || "Erreur lors de l'inscription";
-      return { success: false, message };
+      return {
+        success: false,
+        message: error.response?.data?.message || "Erreur lors de l'inscription",
+      };
     }
   };
 
   const logout = async () => {
     try {
       await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userData');
     } catch (e) {
-      console.log('Erreur suppression token:', e);
+      console.log('Erreur logout:', e);
     } finally {
       setUserToken(null);
       setUser(null);
@@ -84,13 +97,18 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const updateUser = (userData) => {
-    setUser(prev => ({ ...prev, ...userData }));
+  const updateUser = async (userData) => {
+    setUser(userData);
+    try {
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+    } catch (e) {
+      console.log('Erreur persist updateUser:', e.message);
+    }
   };
 
   return (
     <AuthContext.Provider value={{
-      user,           // { _id, username, email, displayName, avatar, bio, ... }
+      user,
       userToken,
       isLoggedIn,
       isAuthenticated: isLoggedIn,
