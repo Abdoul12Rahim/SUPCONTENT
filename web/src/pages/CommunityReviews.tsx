@@ -12,6 +12,7 @@ import {
   Flex,
   Badge,
   useToast,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { StarIcon, ChatIcon, RepeatIcon } from '@chakra-ui/icons';
 import { useState, useEffect } from 'react';
@@ -259,7 +260,7 @@ export const CommunityReviews = () => {
             <Spinner size="xl" color="blue.500" />
           </Flex>
         ) : reviews.length === 0 ? (
-          <Box p={12} bg="white" borderRadius="lg" shadow="sm" textAlign="center">
+          <Box p={12} bg={useColorModeValue('white', 'gray.800')} borderRadius="lg" shadow="sm" textAlign="center">
             <Text fontSize="lg" color="gray.500">
               📝 Aucun avis pour le moment
             </Text>
@@ -270,7 +271,7 @@ export const CommunityReviews = () => {
         ) : (
           <>
             {reviews.map((review) => (
-              <Box key={review._id} bg="white" p={6} borderRadius="lg" shadow="sm">
+              <Box key={review._id} bg={useColorModeValue('white', 'gray.800')} p={6} borderRadius="lg" shadow="sm">
                 <HStack spacing={4} align="start" mb={4}>
                   <Avatar
                     size="md"
@@ -313,11 +314,11 @@ export const CommunityReviews = () => {
                   spacing={4}
                   mb={4}
                   p={3}
-                  bg="gray.50"
+                  bg={useColorModeValue('gray.50', 'gray.600')}
                   borderRadius="md"
                   cursor="pointer"
                   onClick={() => navigate(`/game/${review.content.externalId}`)}
-                  _hover={{ bg: 'gray.100' }}
+                  _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}
                 >
                   {review.content.backgroundImage && (
                     <Image

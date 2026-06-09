@@ -20,6 +20,7 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { AddIcon, LockIcon, ViewIcon } from '@chakra-ui/icons';
 import { useState, useEffect } from 'react';
@@ -27,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { collaborativeListAPI } from '../services/api';
 import CreateListModal from '../components/CollaborativeLists/CreateListModal';
+
 
 interface CollaborativeList {
   _id: string;
@@ -184,7 +186,7 @@ export const CollaborativeListsPage = () => {
     return (
       <Box
         p={6}
-        bg="white"
+        bg={useColorModeValue('white', 'gray.800')}
         borderRadius="lg"
         shadow="md"
         cursor="pointer"

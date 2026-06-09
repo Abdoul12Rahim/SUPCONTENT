@@ -14,7 +14,7 @@ import {
   useToast,
   Image,
   Flex,
-  Link
+  Link,
 } from '@chakra-ui/react';
 import { StarIcon, ChatIcon } from '@chakra-ui/icons';
 import { useAuth } from '../contexts/AuthContext';
@@ -322,7 +322,7 @@ export const Feed = () => {
 
       case 'follow':
         return (
-          <Box key={activity._id} bg="white" p={6} borderRadius="lg" shadow="sm">
+          <Box key={activity._id} bg={useColorModeValue('white', 'gray.800')} p={6} borderRadius="lg" shadow="sm">
             <HStack spacing={4} align="center">
               <Avatar 
                 size="md" 
@@ -365,7 +365,7 @@ export const Feed = () => {
 
       case 'like':
         return (
-          <Box key={activity._id} bg="white" p={6} borderRadius="lg" shadow="sm">
+          <Box key={activity._id} bg="{useColorModeValue('white', 'gray.800')}e" p={6} borderRadius="lg" shadow="sm">
             <HStack spacing={4} align="start">
               <Avatar 
                 size="md" 
@@ -485,7 +485,7 @@ export const Feed = () => {
                   <HStack 
                     spacing={4} 
                     p={3} 
-                    bg="blue.50" 
+                    bg={useColorModeValue('white', 'gray.800')} 
                     borderRadius="md"
                     w="full"
                     cursor="pointer"

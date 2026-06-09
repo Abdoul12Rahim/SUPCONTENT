@@ -37,6 +37,7 @@ import {
   FormLabel,
   Textarea,
   Select,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { SearchIcon, DeleteIcon, ChevronDownIcon, ArrowBackIcon, SettingsIcon, EditIcon, LinkIcon, CopyIcon, RepeatIcon, AddIcon } from '@chakra-ui/icons';
 import { useState, useEffect, useRef } from 'react';
@@ -582,7 +583,7 @@ export const CollaborativeListDetail = () => {
 
         {/* Recherche de jeux */}
         {canEdit() && (
-          <Box bg="white" p={4} borderRadius="lg" shadow="sm" className="search-container" position="relative">
+          <Box bg={useColorModeValue('white', 'gray.800')} p={4} borderRadius="lg" shadow="sm" className="search-container" position="relative">
             <Heading size="md" mb={3}>➕ Ajouter un jeu</Heading>
             <InputGroup>
               <InputLeftElement pointerEvents="none">
@@ -604,7 +605,7 @@ export const CollaborativeListDetail = () => {
                 left={0}
                 right={0}
                 mt={2}
-                bg="white"
+                bg={useColorModeValue('white', 'gray.800')}
                 borderRadius="md"
                 shadow="lg"
                 zIndex={10}
@@ -662,7 +663,7 @@ export const CollaborativeListDetail = () => {
                 left={0}
                 right={0}
                 mt={2}
-                bg="white"
+                bg={useColorModeValue('white', 'gray.800')}
                 borderRadius="md"
                 shadow="lg"
                 p={4}
@@ -675,7 +676,7 @@ export const CollaborativeListDetail = () => {
         )}
 
         {/* Liste des jeux */}
-        <Box bg="white" p={4} borderRadius="lg" shadow="sm">
+        <Box bg={useColorModeValue('white', 'gray.800')} p={4} borderRadius="lg" shadow="sm">
           <Heading size="md" mb={4}>🎮 Jeux de la liste</Heading>
           
           {list.items.length === 0 ? (
@@ -759,7 +760,7 @@ export const CollaborativeListDetail = () => {
         </Box>
 
         {/* Membres */}
-        <Box bg="white" p={4} borderRadius="lg" shadow="sm">
+        <Box bg={useColorModeValue('white', 'gray.800')} p={4} borderRadius="lg" shadow="sm">
           <Heading size="md" mb={4}>👥 Membres ({list.members.length})</Heading>
           <VStack spacing={3} align="stretch">
             {list.members.map((member) => (
@@ -878,7 +879,7 @@ export const CollaborativeListDetail = () => {
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4} align="stretch">
-              <Text fontSize="sm" color="gray.600">
+              <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')}>
                 Partagez ce lien avec d'autres utilisateurs pour qu'ils puissent rejoindre votre liste.
                 {list?.visibility === 'private' && ' (Seuls les personnes avec ce lien peuvent rejoindre)'}
               </Text>
@@ -890,7 +891,7 @@ export const CollaborativeListDetail = () => {
                     value={inviteLink}
                     isReadOnly
                     pr="4.5rem"
-                    bg="gray.50"
+                    bg={useColorModeValue('gray.50', 'gray.600')}
                   />
                 </InputGroup>
               </FormControl>

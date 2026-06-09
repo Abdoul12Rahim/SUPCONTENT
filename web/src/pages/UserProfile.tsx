@@ -268,7 +268,7 @@ export const UserProfile = () => {
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
         {/* En-tête du profil */}
-        <Box bg="white" p={8} borderRadius="lg" shadow="sm">
+        <Box bg="{useColorModeValue('white', 'gray.800')}" p={8} borderRadius="lg" shadow="sm">
           <HStack spacing={6} align="start">
             <Avatar 
               size="2xl" 
