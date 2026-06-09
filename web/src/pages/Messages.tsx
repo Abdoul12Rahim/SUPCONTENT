@@ -472,14 +472,16 @@ export const Messages = () => {
                         >
                           <Flex gap={2} align="flex-end" direction={isOwn ? 'row-reverse' : 'row'}>
                             <Box
-                              maxW="70%"
+                              maxW={{ base: '85%', md: '70%' }}
+                              minW={0}
+                              w="fit-content"
+                              display="inline-block"
                               bg={isOwn ? 'blue.500' : messageBubbleBg}
                               color={isOwn ? 'white' : messageTextColor}
                               px={4}
                               py={2}
                               borderRadius="lg"
                               shadow="sm"
-                              wordBreak="break-word"
                               whiteSpace="pre-wrap"
                               onDoubleClick={async () => {
                                 try {
@@ -503,7 +505,9 @@ export const Messages = () => {
                                 }
                               }}
                             >
-                              <Text wordBreak="break-word" whiteSpace="pre-wrap">{message.content}</Text>
+                              <Text whiteSpace="pre-wrap" wordBreak="normal" overflowWrap="break-word">
+                                {message.content}
+                              </Text>
                               <Text
                                 fontSize="xs"
                                 color={isOwn ? 'blue.100' : mutedText}
@@ -512,6 +516,19 @@ export const Messages = () => {
                               >
                                 {formatMessageTime(message.createdAt)}
                               </Text>
+                              {message.read && (
+                                <Badge
+                                  mt={1}
+                                  ml="auto"
+                                  colorScheme="green"
+                                  variant="subtle"
+                                  borderRadius="full"
+                                  px={2}
+                                  fontSize="xs"
+                                >
+                                  Lu
+                                </Badge>
+                              )}
                               {/* Like indicator */}
                               <Flex mt={1} justify="flex-end" align="center" gap={2}>
                                 {likesCount > 0 && (
