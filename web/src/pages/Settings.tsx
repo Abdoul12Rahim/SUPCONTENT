@@ -266,7 +266,7 @@ export const Settings = () => {
                       <Textarea 
                         value={bio} 
                         onChange={(e) => setBio(e.target.value)}
-                        placeholder="Utilisateur de démonstration" 
+                        placeholder="Bienvenue sur mon profil !" 
                         rows={3}
                         bg={inputBg}
                       />
