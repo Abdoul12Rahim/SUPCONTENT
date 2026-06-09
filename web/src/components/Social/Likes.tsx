@@ -1,37 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { fetchLikes, addLike, removeLike } from '../../services/api';
+import { useMemo, useState } from 'react';
 
-const Likes = ({ contentId, userId }) => {
-    const [likes, setLikes] = useState([]);
-    const [isLiked, setIsLiked] = useState(false);
+interface LikeEntry {
+    userId: string;
+}
 
-    useEffect(() => {
-        const loadLikes = async () => {
-            const fetchedLikes = await fetchLikes(contentId);
-            setLikes(fetchedLikes);
-            setIsLiked(fetchedLikes.some(like => like.userId === userId));
-        };
+interface LikesProps {
+    contentId: string;
+    userId: string;
+    initialLikes?: LikeEntry[];
+}
 
-        loadLikes();
-    }, [contentId, userId]);
+const Likes = ({ contentId, userId, initialLikes = [] }: LikesProps) => {
+    const [likes, setLikes] = useState<LikeEntry[]>(initialLikes);
 
-    const handleLike = async () => {
+    const isLiked = useMemo(
+        () => likes.some((like) => like.userId === userId),
+        [likes, userId]
+    );
+
+    const handleLike = () => {
         if (isLiked) {
-            await removeLike(contentId, userId);
-            setLikes(likes.filter(like => like.userId !== userId));
-        } else {
-            await addLike(contentId, userId);
-            setLikes([...likes, { userId }]);
+            setLikes(likes.filter((like) => like.userId !== userId));
+            return;
         }
-        setIsLiked(!isLiked);
+
+        setLikes([...likes, { userId }]);
     };
 
     return (
-        <div>
-            <button onClick={handleLike}>
-                {isLiked ? 'Unlike' : 'Like'}
-            </button>
-            <p>{likes.length} {likes.length === 1 ? 'Like' : 'Likes'}</p>
+        <div data-content-id={contentId}>
+            <button onClick={handleLike}>{isLiked ? 'Unlike' : 'Like'}</button>
+            <p>
+                {likes.length} {likes.length === 1 ? 'Like' : 'Likes'}
+            </p>
         </div>
     );
 };

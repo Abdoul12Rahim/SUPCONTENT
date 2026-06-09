@@ -39,6 +39,7 @@ import { getAvatarUrl } from '../utils/avatar';
 import { GameCard } from '../components/Content/GameCard';
 import { Loading } from '../components/Common/Loading';
 import { AchievementsSection } from '../components/Profile/AchievementsSection';
+import { useColorModeValue } from '@chakra-ui/react';
 
 interface UserStats {
   libraryCount: number;
@@ -117,6 +118,12 @@ export const Profile = () => {
   const [libraryGames, setLibraryGames] = useState<LibraryGame[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [loadingLibrary, setLoadingLibrary] = useState(false);
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const surfaceBg = useColorModeValue('gray.50', 'gray.900');
+  const tabBg = useColorModeValue('gray.50', 'gray.700');
+  const tabSelectedBg = useColorModeValue('white', 'gray.800');
+  const mutedText = useColorModeValue('gray.600', 'gray.400');
+  const bodyText = useColorModeValue('gray.700', 'gray.200');
 
   // Rediriger vers l'accueil si l'utilisateur n'est pas authentifié
   useEffect(() => {
@@ -351,7 +358,7 @@ export const Profile = () => {
     <Container maxW="container.lg" py={8}>
       <VStack spacing={6} align="stretch">
         {/* En-tête du profil */}
-        <Box bg="white" p={8} borderRadius="lg" shadow="sm" position="relative">
+        <Box bg={cardBg} p={8} borderRadius="lg" shadow="sm" position="relative">
           <Button 
             position="absolute" 
             top={6} 
@@ -373,8 +380,8 @@ export const Profile = () => {
             </Box>
             <VStack align="start" flex={1} spacing={2}>
               <Heading size="lg">{user.displayName || user.username}</Heading>
-              <Text color="gray.600">{user.email}</Text>
-              {user.bio && <Text color="gray.700" mt={2}>{user.bio}</Text>}
+              <Text color={mutedText}>{user.email}</Text>
+              {user.bio && <Text color={bodyText} mt={2}>{user.bio}</Text>}
               
               <HStack spacing={6} pt={2} color="gray.700">
                 <HStack 
@@ -404,7 +411,7 @@ export const Profile = () => {
           </HStack>
 
           {/* Section des statistiques principales */}
-          <HStack spacing={0} justify="center" mt={8} pt={6} borderTop="1px" borderColor="gray.200">
+          <HStack spacing={0} justify="center" mt={8} pt={6} borderTop="1px" borderColor={useColorModeValue('gray.200', 'gray.600')}>
             <Box textAlign="center" flex={1}>
               <Heading size="sm" color="gray.600" mb={1}>Critiques</Heading>
               <HStack justify="center" spacing={2}>
@@ -421,17 +428,17 @@ export const Profile = () => {
 
         {/* Onglets */}
         <Tabs colorScheme="gray" variant="soft-rounded">
-          <TabList bg="gray.50" p={2} borderRadius="lg">
-            <Tab _selected={{ bg: 'white', fontWeight: 'semibold' }}>
+          <TabList bg={tabBg} p={2} borderRadius="lg">
+            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
               Critiques ({stats.reviewCount})
             </Tab>
-            <Tab _selected={{ bg: 'white', fontWeight: 'semibold' }}>
+            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
               Collection ({stats.libraryCount})
             </Tab>
-            <Tab _selected={{ bg: 'white', fontWeight: 'semibold' }}>
+            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
               Achievements
             </Tab>
-            <Tab _selected={{ bg: 'white', fontWeight: 'semibold' }}>
+            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
               Statistiques
             </Tab>
           </TabList>
@@ -439,7 +446,7 @@ export const Profile = () => {
           <TabPanels>
             {/* Onglet Critiques */}
             <TabPanel px={0}>
-              <Box bg="white" p={6} borderRadius="lg" shadow="sm" minH="300px">
+              <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm" minH="300px">
                 {loadingReviews ? (
                   <Center py={8}>
                     <Loading />
@@ -509,7 +516,7 @@ export const Profile = () => {
 
             {/* Onglet Collection */}
             <TabPanel px={0}>
-              <Box bg="white" p={6} borderRadius="lg" shadow="sm" minH="300px">
+              <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm" minH="300px">
                 {loadingLibrary ? (
                   <Center py={8}>
                     <Loading />
@@ -551,7 +558,7 @@ export const Profile = () => {
 
             {/* Onglet Achievements */}
             <TabPanel px={0}>
-              <Box bg="white" p={6} borderRadius="lg" shadow="sm" minH="300px">
+              <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm" minH="300px">
                 {user && <AchievementsSection userId={user._id} isOwnProfile={true} />}
               </Box>
             </TabPanel>
@@ -560,7 +567,7 @@ export const Profile = () => {
             <TabPanel px={0}>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
                 {/* Répartition par genre */}
-                <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+                <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
                   <Heading size="md" mb={6}>Répartition par genre</Heading>
                   {genreStats.length > 0 ? (
                     <VStack spacing={4} align="stretch">
@@ -595,7 +602,7 @@ export const Profile = () => {
                 </Box>
 
                 {/* Activité récente */}
-                <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+                <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
                   <Heading size="md" mb={6}>Activité récente</Heading>
                   {recentActivity.length > 0 ? (
                     <VStack spacing={4} align="stretch">

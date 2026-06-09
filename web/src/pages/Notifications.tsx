@@ -17,6 +17,7 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { BellIcon, DeleteIcon, CheckIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import { useState, useEffect } from 'react';
@@ -54,6 +55,13 @@ export const Notifications = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState<FilterType>('all');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const readBg = useColorModeValue('white', 'gray.800');
+  const unreadBg = useColorModeValue('blue.50', 'blue.900');
+  const hoverReadBg = useColorModeValue('gray.50', 'gray.700');
+  const hoverUnreadBg = useColorModeValue('blue.100', 'blue.800');
+  const mutedText = useColorModeValue('gray.500', 'gray.400');
+  const dividerBg = useColorModeValue('gray.200', 'gray.700');
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -271,18 +279,18 @@ export const Notifications = () => {
           </Flex>
         ) : notifications.length === 0 ? (
           <Box textAlign="center" py={10}>
-            <Text color="gray.500" fontSize="lg">
+            <Text color={mutedText} fontSize="lg">
               Aucune notification {filter !== 'all' && `de type ${filter}`}
             </Text>
           </Box>
         ) : (
-          <VStack spacing={0} align="stretch" bg="white" borderRadius="lg" overflow="hidden">
+          <VStack spacing={0} align="stretch" bg={cardBg} borderRadius="lg" overflow="hidden">
             {notifications.map((notification, index) => (
               <Box key={notification._id}>
                 <Flex
                   p={4}
-                  bg={notification.isRead ? 'white' : 'blue.50'}
-                  _hover={{ bg: notification.isRead ? 'gray.50' : 'blue.100' }}
+                  bg={notification.isRead ? readBg : unreadBg}
+                  _hover={{ bg: notification.isRead ? hoverReadBg : hoverUnreadBg }}
                   cursor="pointer"
                   transition="all 0.2s"
                   onClick={() => handleNotificationClick(notification)}
@@ -309,9 +317,9 @@ export const Notifications = () => {
                       >
                         {notification.from.displayName || notification.from.username}
                       </Text>
-                      <Text color="gray.600">{notification.message}</Text>
+                      <Text color={mutedText}>{notification.message}</Text>
                     </HStack>
-                    <Text fontSize="sm" color="gray.500">
+                    <Text fontSize="sm" color={mutedText}>
                       {formatTime(notification.createdAt)}
                     </Text>
                   </Box>
@@ -346,7 +354,7 @@ export const Notifications = () => {
                     </Menu>
                   </HStack>
                 </Flex>
-                {index < notifications.length - 1 && <Box h="1px" bg="gray.200" />}
+                {index < notifications.length - 1 && <Box h="1px" bg={dividerBg} />}
               </Box>
             ))}
           </VStack>

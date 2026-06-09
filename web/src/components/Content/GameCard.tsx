@@ -1,4 +1,4 @@
-import { Box, Image, Text, Badge, HStack, VStack, Icon } from '@chakra-ui/react';
+import { Box, Image, Text, Badge, HStack, VStack, Icon, useColorModeValue } from '@chakra-ui/react';
 import { StarIcon } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
 
@@ -15,13 +15,15 @@ interface GameCardProps {
 
 export const GameCard = ({ id, title, slug, image, rating, releaseDate, genres, platforms }: GameCardProps) => {
   const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const releaseText = useColorModeValue('gray.500', 'gray.400');
   
   return (
     <Link to={`/game/${id}`}>
       <Box
         borderRadius="xl"
         overflow="hidden"
-        bg="white"
+        bg={cardBg}
         transition="all 0.3s"
         _hover={{ transform: 'translateY(-4px)', shadow: 'xl' }}
         cursor="pointer"
@@ -67,7 +69,7 @@ export const GameCard = ({ id, title, slug, image, rating, releaseDate, genres, 
             )}
             
             {releaseDate && (
-              <Text fontSize="xs" color="gray.500">
+              <Text fontSize="xs" color={releaseText}>
                 {new Date(releaseDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
               </Text>
             )}

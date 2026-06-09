@@ -16,6 +16,7 @@ import {
   Divider,
   InputGroup,
   InputRightElement,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { ArrowBackIcon, DeleteIcon, CloseIcon } from '@chakra-ui/icons';
 import { useState, useEffect, useRef } from 'react';
@@ -81,6 +82,15 @@ export const Messages = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const panelBg = useColorModeValue('white', 'gray.800');
+  const panelBorder = useColorModeValue('gray.200', 'gray.700');
+  const listHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100');
+  const activeConversationBg = useColorModeValue('blue.50', 'blue.900');
+  const chatAreaBg = useColorModeValue('gray.50', 'gray.900');
+  const inputBarBg = useColorModeValue('white', 'gray.800');
+  const messageBubbleBg = useColorModeValue('white', 'gray.700');
+  const messageTextColor = useColorModeValue('black', 'whiteAlpha.900');
+  const mutedText = useColorModeValue('gray.500', 'gray.400');
 
   // Charger les conversations au montage
   useEffect(() => {
@@ -295,12 +305,12 @@ export const Messages = () => {
     <Container maxW="container.xl" py={8}>
       <Heading mb={6}>💬 Messages</Heading>
 
-      <Flex h="600px" bg="white" borderRadius="lg" shadow="md" overflow="hidden">
+      <Flex h="600px" bg={panelBg} borderRadius="lg" shadow="md" overflow="hidden">
         {/* Liste des conversations */}
         <Box
           w={{ base: selectedConversation ? '0' : '100%', md: '350px' }}
           borderRight="1px"
-          borderColor="gray.200"
+          borderColor={panelBorder}
           overflowY="auto"
           display={{ base: selectedConversation ? 'none' : 'block', md: 'block' }}
         >
@@ -310,10 +320,10 @@ export const Messages = () => {
             </Flex>
           ) : conversations.length === 0 ? (
             <Box p={6} textAlign="center">
-              <Text color="gray.500" mb={4}>
+              <Text color={mutedText} mb={4}>
                 Aucune conversation
               </Text>
-              <Text fontSize="sm" color="gray.400">
+              <Text fontSize="sm" color={mutedText}>
                 Commencez une conversation en visitant le profil d'un utilisateur !
               </Text>
             </Box>
@@ -326,13 +336,13 @@ export const Messages = () => {
                   cursor="pointer"
                   bg={
                     selectedConversation?._id === conversation._id
-                      ? 'blue.50'
+                      ? activeConversationBg
                       : 'transparent'
                   }
-                  _hover={{ bg: 'gray.50' }}
+                  _hover={{ bg: listHoverBg }}
                   onClick={() => handleSelectConversation(conversation)}
                   borderBottom="1px"
-                  borderColor="gray.100"
+                  borderColor={panelBorder}
                 >
                   <HStack spacing={3} align="start">
                     <Avatar
@@ -356,12 +366,12 @@ export const Messages = () => {
                         )}
                       </HStack>
                       {conversation.lastMessage && (
-                        <Text fontSize="sm" color="gray.500" isTruncated w="full">
+                        <Text fontSize="sm" color={mutedText} isTruncated w="full">
                           {conversation.lastMessage.content}
                         </Text>
                       )}
                       {conversation.lastMessageAt && (
-                        <Text fontSize="xs" color="gray.400">
+                        <Text fontSize="xs" color={mutedText}>
                           {formatMessageTime(conversation.lastMessageAt)}
                         </Text>
                       )}
@@ -385,9 +395,9 @@ export const Messages = () => {
               <Flex
                 p={4}
                 borderBottom="1px"
-                borderColor="gray.200"
+                borderColor={panelBorder}
                 align="center"
-                bg="gray.50"
+                bg={chatAreaBg}
                 justify="space-between"
               >
                 <HStack spacing={2} flex={1}>
@@ -422,7 +432,7 @@ export const Messages = () => {
                       {selectedConversation.otherParticipant.displayName ||
                         selectedConversation.otherParticipant.username}
                     </Text>
-                    <Text fontSize="xs" color="gray.500">
+                    <Text fontSize="xs" color={mutedText}>
                       @{selectedConversation.otherParticipant.username}
                     </Text>
                   </VStack>
@@ -438,14 +448,14 @@ export const Messages = () => {
               </Flex>
 
               {/* Messages */}
-              <Box flex={1} overflowY="auto" p={4} bg="gray.50">
+              <Box flex={1} overflowY="auto" p={4} bg={chatAreaBg}>
                 {loading ? (
                   <Flex justify="center" align="center" h="100%">
                     <Spinner size="lg" color="blue.500" />
                   </Flex>
                 ) : messages.length === 0 ? (
                   <Flex justify="center" align="center" h="100%">
-                    <Text color="gray.500">Aucun message pour le moment</Text>
+                    <Text color={mutedText}>Aucun message pour le moment</Text>
                   </Flex>
                 ) : (
                   <VStack spacing={3} align="stretch">
@@ -463,8 +473,8 @@ export const Messages = () => {
                           <Flex gap={2} align="flex-end" direction={isOwn ? 'row-reverse' : 'row'}>
                             <Box
                               maxW="70%"
-                              bg={isOwn ? 'blue.500' : 'white'}
-                              color={isOwn ? 'white' : 'black'}
+                              bg={isOwn ? 'blue.500' : messageBubbleBg}
+                              color={isOwn ? 'white' : messageTextColor}
                               px={4}
                               py={2}
                               borderRadius="lg"
@@ -496,7 +506,7 @@ export const Messages = () => {
                               <Text wordBreak="break-word" whiteSpace="pre-wrap">{message.content}</Text>
                               <Text
                                 fontSize="xs"
-                                color={isOwn ? 'blue.100' : 'gray.500'}
+                                color={isOwn ? 'blue.100' : mutedText}
                                 textAlign="right"
                                 mt={1}
                               >
@@ -535,7 +545,7 @@ export const Messages = () => {
               </Box>
 
               {/* Input pour envoyer un message */}
-              <Box p={4} borderTop="1px" borderColor="gray.200" bg="white">
+              <Box p={4} borderTop="1px" borderColor={panelBorder} bg={inputBarBg}>
                 <form onSubmit={handleSendMessage}>
                   <InputGroup>
                     <Input
@@ -564,7 +574,7 @@ export const Messages = () => {
             <Flex justify="center" align="center" h="100%">
               <VStack spacing={2}>
                 <Text fontSize="4xl">💬</Text>
-                <Text color="gray.500">
+                <Text color={mutedText}>
                   Sélectionnez une conversation pour commencer
                 </Text>
               </VStack>

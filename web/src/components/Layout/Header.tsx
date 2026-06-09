@@ -11,10 +11,11 @@ import {
   MenuList,
   MenuItem,
   MenuDivider,
-  Icon,
   IconButton,
+  useColorMode,
+  useColorModeValue,
 } from '@chakra-ui/react';
-import { SearchIcon, BellIcon, SettingsIcon } from '@chakra-ui/icons';
+import { SearchIcon, SettingsIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -26,9 +27,15 @@ import { Badge } from '@chakra-ui/react';
 export const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { t } = useLanguage();
+  const { colorMode, toggleColorMode } = useColorMode();
   const location = useLocation();
   const navigate = useNavigate();
   const { unreadCount } = useUnreadMessages();
+  const headerBg = useColorModeValue('white', 'gray.800');
+  const headerBorder = useColorModeValue('gray.100', 'gray.700');
+  const primaryText = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const navText = useColorModeValue('gray.600', 'gray.300');
+  const navTextActive = useColorModeValue('gray.900', 'white');
 
   const handleLogout = () => {
     logout();
@@ -42,14 +49,14 @@ export const Header = () => {
   };
   
   return (
-    <Box bg="white" px={4} shadow="sm" position="sticky" top={0} zIndex={10} borderBottom="1px" borderColor="gray.100">
+    <Box bg={headerBg} px={4} shadow="sm" position="sticky" top={0} zIndex={10} borderBottom="1px" borderColor={headerBorder}>
       <Container maxW="container.xl">
         <Flex h={16} alignItems="center" justifyContent="space-between">
           <HStack spacing={8}>
             <Link to="/">
               <HStack spacing={2}>
                 <Text fontSize="3xl">🎮</Text>
-                <Text fontSize="xl" fontWeight="bold" color="gray.800">
+                <Text fontSize="xl" fontWeight="bold" color={primaryText}>
                   UNIVERS GAME
                 </Text>
               </HStack>
@@ -60,8 +67,8 @@ export const Header = () => {
                 <Button 
                   variant="ghost"
                   fontWeight={isActive('/') ? 'bold' : 'normal'}
-                  color={isActive('/') ? 'gray.900' : 'gray.600'}
-                  _hover={{ color: 'gray.900' }}
+                  color={isActive('/') ? navTextActive : navText}
+                  _hover={{ color: navTextActive }}
                 >
                   🏠 Accueil
                 </Button>
@@ -70,8 +77,8 @@ export const Header = () => {
                 <Button 
                   variant="ghost"
                   fontWeight={isActive('/games') ? 'bold' : 'normal'}
-                  color={isActive('/games') ? 'gray.900' : 'gray.600'}
-                  _hover={{ color: 'gray.900' }}
+                  color={isActive('/games') ? navTextActive : navText}
+                  _hover={{ color: navTextActive }}
                   leftIcon={<SearchIcon />}
                 >
                   Recherche
@@ -85,8 +92,8 @@ export const Header = () => {
                       as={Button}
                       variant="ghost"
                       fontWeight={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? 'bold' : 'normal'}
-                      color={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? 'gray.900' : 'gray.600'}
-                      _hover={{ color: 'gray.900' }}
+                      color={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
+                      _hover={{ color: navTextActive }}
                     >
                       📂 Mon Espace
                     </MenuButton>
@@ -110,8 +117,8 @@ export const Header = () => {
                     <Button 
                       variant="ghost"
                       fontWeight={isActive('/discover') ? 'bold' : 'normal'}
-                      color={isActive('/discover') ? 'gray.900' : 'gray.600'}
-                      _hover={{ color: 'gray.900' }}
+                      color={isActive('/discover') ? navTextActive : navText}
+                      _hover={{ color: navTextActive }}
                     >
                       🔍 Découvrir
                     </Button>
@@ -122,8 +129,8 @@ export const Header = () => {
                       <Button 
                         variant="ghost"
                         fontWeight={isActive('/messages') ? 'bold' : 'normal'}
-                        color={isActive('/messages') ? 'gray.900' : 'gray.600'}
-                        _hover={{ color: 'gray.900' }}
+                        color={isActive('/messages') ? navTextActive : navText}
+                        _hover={{ color: navTextActive }}
                       >
                         💬 Messages
                       </Button>
@@ -153,6 +160,13 @@ export const Header = () => {
           </HStack>
 
           <HStack spacing={3}>
+            <IconButton
+              aria-label={colorMode === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+              icon={colorMode === 'dark' ? <SunIcon /> : <MoonIcon />}
+              variant="ghost"
+              onClick={toggleColorMode}
+            />
+
             {isAuthenticated ? (
               <>
                 <NotificationBell />

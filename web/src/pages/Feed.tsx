@@ -26,6 +26,7 @@ import { CommentSection } from '../components/Content/CommentSection';
 import { socialAPI as socialService } from '../services/socialService';
 import { useSocket } from '../contexts/SocketContext';
 import { getAvatarUrl } from '../utils/avatar';
+import { useColorModeValue } from '@chakra-ui/react';
 
 interface Activity {
   _id: string;
@@ -84,6 +85,10 @@ export const Feed = () => {
   const [hasMore, setHasMore] = useState(true);
   const [followingUsers, setFollowingUsers] = useState<Set<string>>(new Set());
   const [filterType, setFilterType] = useState<string>('all');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const surfaceBg = useColorModeValue('gray.50', 'gray.900');
+  const chipBg = useColorModeValue('gray.50', 'whiteAlpha.100');
+  const chipHoverBg = useColorModeValue('gray.100', 'whiteAlpha.200');
 
   const fetchFeed = async () => {
     try {
@@ -180,7 +185,7 @@ export const Feed = () => {
     switch (activity.type) {
       case 'review':
         return (
-          <Box key={activity._id} bg="white" p={6} borderRadius="lg" shadow="sm">
+          <Box key={activity._id} bg={cardBg} p={6} borderRadius="lg" shadow="sm">
             <HStack spacing={4} align="start" mb={4}>
               <Avatar 
                 size="md" 
@@ -212,11 +217,11 @@ export const Feed = () => {
                 spacing={4} 
                 mb={4} 
                 p={3} 
-                bg="gray.50" 
+                bg={chipBg} 
                 borderRadius="md"
                 cursor="pointer"
                 onClick={() => navigate(`/game/${activity.content!.externalId}`)}
-                _hover={{ bg: 'gray.100' }}
+                _hover={{ bg: chipHoverBg }}
               >
                 {activity.content.backgroundImage && (
                   <Image
@@ -259,7 +264,7 @@ export const Feed = () => {
 
       case 'library_add':
         return (
-          <Box key={activity._id} bg="white" p={6} borderRadius="lg" shadow="sm">
+          <Box key={activity._id} bg={cardBg} p={6} borderRadius="lg" shadow="sm">
             <HStack spacing={4} align="center">
               <Avatar 
                 size="md" 
@@ -401,12 +406,12 @@ export const Feed = () => {
                   <HStack 
                     spacing={4} 
                     p={3} 
-                    bg="gray.50" 
+                    bg={chipBg} 
                     borderRadius="md"
                     w="full"
                     cursor="pointer"
                     onClick={() => navigate(`/game/${activity.content!.externalId}`)}
-                    _hover={{ bg: 'gray.100' }}
+                    _hover={{ bg: chipHoverBg }}
                   >
                     {activity.content.backgroundImage && (
                       <Image
@@ -432,7 +437,7 @@ export const Feed = () => {
 
       case 'comment':
         return (
-          <Box key={activity._id} bg="white" p={6} borderRadius="lg" shadow="sm">
+          <Box key={activity._id} bg={cardBg} p={6} borderRadius="lg" shadow="sm">
             <HStack spacing={4} align="start">
               <Avatar 
                 size="md" 
@@ -470,7 +475,7 @@ export const Feed = () => {
                   {formatTimeAgo(activity.createdAt)}
                 </Text>
                 {activity.metadata?.commentText && (
-                  <Box p={3} bg="gray.50" borderRadius="md" w="full">
+                  <Box p={3} bg={chipBg} borderRadius="md" w="full">
                     <Text fontSize="sm" color="gray.700">
                       💬 "{activity.metadata.commentText}..."
                     </Text>
@@ -527,7 +532,7 @@ export const Feed = () => {
 
         {/* Statistiques */}
         {!loading && activities.length > 0 && (
-          <Box bg="white" p={4} borderRadius="lg" shadow="sm">
+          <Box bg={cardBg} p={4} borderRadius="lg" shadow="sm">
             <HStack spacing={6} flexWrap="wrap" justify="space-around">
               <VStack spacing={0}>
                 <Text fontSize="2xl" fontWeight="bold" color="blue.500">
@@ -620,7 +625,7 @@ export const Feed = () => {
             <Spinner size="xl" color="blue.500" />
           </Flex>
         ) : activities.length === 0 ? (
-          <Box p={12} bg="white" borderRadius="lg" shadow="sm" textAlign="center">
+          <Box p={12} bg={cardBg} borderRadius="lg" shadow="sm" textAlign="center">
             <Text fontSize="lg" color="gray.500" mb={2}>
               👥 Aucune activité pour le moment
             </Text>

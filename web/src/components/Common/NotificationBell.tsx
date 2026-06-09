@@ -14,6 +14,7 @@ import {
   Button,
   Spinner,
   useToast,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { BellIcon } from '@chakra-ui/icons';
 import { useState, useEffect } from 'react';
@@ -46,6 +47,17 @@ export const NotificationBell = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const menuBg = useColorModeValue('white', 'gray.800');
+  const menuBorder = useColorModeValue('gray.200', 'gray.700');
+  const headerText = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const mutedText = useColorModeValue('gray.500', 'gray.400');
+  const unreadBg = useColorModeValue('blue.50', 'blue.900');
+  const unreadHoverBg = useColorModeValue('blue.100', 'blue.800');
+  const readBg = useColorModeValue('white', 'gray.800');
+  const readHoverBg = useColorModeValue('gray.50', 'gray.700');
+  const dividerColor = useColorModeValue('gray.200', 'gray.700');
+  const avatarNameColor = useColorModeValue('blue.600', 'blue.300');
+  const messageTextColor = useColorModeValue('gray.600', 'gray.300');
 
   useEffect(() => {
     if (isOpen && isAuthenticated) {
@@ -195,14 +207,14 @@ export const NotificationBell = () => {
         variant="ghost"
         aria-label="Notifications"
       />
-      <MenuList maxH="500px" overflowY="auto" w="400px" p={0}>
-        <Box p={4} borderBottomWidth="1px">
+      <MenuList maxH="500px" overflowY="auto" w="400px" p={0} bg={menuBg} borderColor={menuBorder}>
+        <Box p={4} borderBottomWidth="1px" borderColor={dividerColor}>
           <HStack justify="space-between">
-            <Text fontWeight="bold" fontSize="lg">
+            <Text fontWeight="bold" fontSize="lg" color={headerText}>
               Notifications
             </Text>
             {unreadCount > 0 && (
-              <Button size="sm" variant="ghost" onClick={handleMarkAllAsRead}>
+              <Button size="sm" variant="ghost" onClick={handleMarkAllAsRead} color={headerText}>
                 Tout marquer comme lu
               </Button>
             )}
@@ -218,7 +230,7 @@ export const NotificationBell = () => {
             <Text fontSize="4xl" mb={2}>
               🔔
             </Text>
-            <Text color="gray.500">Aucune notification</Text>
+            <Text color={mutedText}>Aucune notification</Text>
           </Box>
         ) : (
           <VStack spacing={0} align="stretch">
@@ -227,8 +239,8 @@ export const NotificationBell = () => {
                 <MenuItem
                   py={3}
                   px={4}
-                  bg={notification.isRead ? 'white' : 'blue.50'}
-                  _hover={{ bg: notification.isRead ? 'gray.50' : 'blue.100' }}
+                  bg={notification.isRead ? readBg : unreadBg}
+                  _hover={{ bg: notification.isRead ? readHoverBg : unreadHoverBg }}
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <HStack spacing={3} align="start" w="full">
@@ -245,19 +257,19 @@ export const NotificationBell = () => {
                         <Text 
                           fontSize="sm" 
                           fontWeight={notification.isRead ? 'normal' : 'bold'}
-                          color="blue.600"
+                          color={avatarNameColor}
                           cursor="pointer"
                           _hover={{ textDecoration: 'underline' }}
                           onClick={(e) => handleUserClick(e, notification.from._id)}
                         >
                           {notification.from.displayName || notification.from.username}
                         </Text>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm" color={messageTextColor}>
                           {notification.message}
                         </Text>
                         <Text fontSize="lg">{getNotificationIcon(notification.type)}</Text>
                       </HStack>
-                      <Text fontSize="xs" color="gray.500">
+                      <Text fontSize="xs" color={mutedText}>
                         {formatTimeAgo(notification.createdAt)}
                       </Text>
                     </VStack>
@@ -266,7 +278,7 @@ export const NotificationBell = () => {
                     )}
                   </HStack>
                 </MenuItem>
-                {index < notifications.length - 1 && <Divider />}
+                {index < notifications.length - 1 && <Divider borderColor={dividerColor} />}
               </Box>
             ))}
           </VStack>
@@ -275,7 +287,7 @@ export const NotificationBell = () => {
         {/* Bouton Voir toutes */}
         {notifications.length > 0 && (
           <>
-            <Divider />
+            <Divider borderColor={dividerColor} />
             <Box p={3}>
               <Button
                 w="full"
@@ -283,6 +295,7 @@ export const NotificationBell = () => {
                 colorScheme="blue"
                 variant="ghost"
                 onClick={() => navigate('/notifications')}
+                color={headerText}
               >
                 Voir toutes les notifications
               </Button>

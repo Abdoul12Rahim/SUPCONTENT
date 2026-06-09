@@ -13,6 +13,7 @@ import {
   Divider,
   useToast,
   Select,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -51,6 +52,13 @@ export const ContentPage = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
   const toast = useToast();
+  const infoCardBg = useColorModeValue('white', 'gray.800');
+  const infoCardBorder = useColorModeValue('gray.200', 'gray.700');
+  const libraryOnBg = useColorModeValue('green.50', 'green.900');
+  const libraryOffBg = useColorModeValue('white', 'gray.800');
+  const selectBg = useColorModeValue('white', 'gray.800');
+  const bodyText = useColorModeValue('gray.700', 'gray.300');
+  const metaText = useColorModeValue('gray.600', 'gray.400');
 
   useEffect(() => {
     if (slug) {
@@ -204,7 +212,7 @@ export const ContentPage = () => {
                 <Heading size="lg" mb={4}>
                   À propos
                 </Heading>
-                <Text color="gray.700">{game.description || 'Aucune description disponible.'}</Text>
+                <Text color={bodyText}>{game.description || 'Aucune description disponible.'}</Text>
               </Box>
 
               <Divider />
@@ -244,7 +252,13 @@ export const ContentPage = () => {
           <GridItem colSpan={{ base: 12, lg: 4 }}>
             <VStack align="stretch" spacing={4} position="sticky" top="80px">
               {isAuthenticated && (
-                <Box p={4} borderWidth={1} borderRadius="md" bg={inLibrary ? "green.50" : "white"}>
+                <Box
+                  p={4}
+                  borderWidth={1}
+                  borderRadius="md"
+                  bg={inLibrary ? libraryOnBg : libraryOffBg}
+                  borderColor={infoCardBorder}
+                >
                   {inLibrary ? (
                     <>
                       <HStack mb={3}>
@@ -257,7 +271,7 @@ export const ContentPage = () => {
                         value={libraryStatus}
                         onChange={(e) => setLibraryStatus(e.target.value)}
                         mb={3}
-                        bg="white"
+                        bg={selectBg}
                       >
                         <option value="playing">{t('playing')}</option>
                         <option value="completed">{t('completed')}</option>
@@ -302,11 +316,11 @@ export const ContentPage = () => {
                 </Box>
               )}
 
-              <Box p={4} borderWidth={1} borderRadius="md" bg="white">
+              <Box p={4} borderWidth={1} borderRadius="md" bg={infoCardBg} borderColor={infoCardBorder}>
                 <VStack align="stretch" spacing={3}>
                   {game.developers && game.developers.length > 0 && (
                     <Box>
-                      <Text fontWeight="bold" fontSize="sm" color="gray.600">
+                      <Text fontWeight="bold" fontSize="sm" color={metaText}>
                         Développeurs
                       </Text>
                       <Text>{game.developers.join(', ')}</Text>
@@ -315,7 +329,7 @@ export const ContentPage = () => {
 
                   {game.publishers && game.publishers.length > 0 && (
                     <Box>
-                      <Text fontWeight="bold" fontSize="sm" color="gray.600">
+                      <Text fontWeight="bold" fontSize="sm" color={metaText}>
                         Éditeurs
                       </Text>
                       <Text>{game.publishers.join(', ')}</Text>
@@ -324,7 +338,7 @@ export const ContentPage = () => {
 
                   {game.released && (
                     <Box>
-                      <Text fontWeight="bold" fontSize="sm" color="gray.600">
+                      <Text fontWeight="bold" fontSize="sm" color={metaText}>
                         Date de sortie
                       </Text>
                       <Text>{new Date(game.released).toLocaleDateString('fr-FR')}</Text>
@@ -333,7 +347,7 @@ export const ContentPage = () => {
 
                   {game.esrbRating && (
                     <Box>
-                      <Text fontWeight="bold" fontSize="sm" color="gray.600">
+                      <Text fontWeight="bold" fontSize="sm" color={metaText}>
                         Classification
                       </Text>
                       <Text>{game.esrbRating}</Text>

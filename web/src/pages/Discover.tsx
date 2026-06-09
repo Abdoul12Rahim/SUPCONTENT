@@ -15,7 +15,8 @@ import {
   Spinner,
   Center,
   Badge,
-  Flex
+  Flex,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
 import { useState, useEffect } from 'react';
@@ -49,6 +50,15 @@ export const Discover = () => {
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const [followLoading, setFollowLoading] = useState<{ [key: string]: boolean }>({});
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const surfaceBg = useColorModeValue('gray.50', 'gray.900');
+  const emptyStateBg = useColorModeValue('gray.50', 'gray.800');
+  const mutedText = useColorModeValue('gray.600', 'gray.400');
+  const bodyText = useColorModeValue('gray.700', 'gray.200');
+  const searchBorder = useColorModeValue('gray.200', 'gray.700');
+  const searchText = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const searchPlaceholder = useColorModeValue('gray.500', 'gray.400');
+  const sectionText = useColorModeValue('gray.700', 'gray.200');
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -148,7 +158,7 @@ export const Discover = () => {
 
   const UserCard = ({ user }: { user: UserSuggestion }) => (
     <Box
-      bg="white"
+      bg={cardBg}
       p={6}
       borderRadius="lg"
       shadow="sm"
@@ -173,18 +183,18 @@ export const Discover = () => {
           >
             {user.displayName || user.username}
           </Text>
-          <Text fontSize="sm" color="gray.600">
+          <Text fontSize="sm" color={mutedText}>
             @{user.username}
           </Text>
         </VStack>
         
         {user.bio && (
-          <Text fontSize="sm" color="gray.700" textAlign="center" noOfLines={2}>
+          <Text fontSize="sm" color={bodyText} textAlign="center" noOfLines={2}>
             {user.bio}
           </Text>
         )}
 
-        <HStack spacing={4} fontSize="sm" color="gray.600">
+        <HStack spacing={4} fontSize="sm" color={mutedText}>
           <HStack>
             <Text>👥</Text>
             <Text fontWeight="medium">{user.stats.followersCount} abonnés</Text>
@@ -214,20 +224,26 @@ export const Discover = () => {
       <VStack spacing={8} align="stretch">
         {/* En-tête */}
         <Box>
-          <Heading mb={2}>🔍 Découvrir</Heading>
-          <Text color="gray.600">Trouvez de nouveaux utilisateurs à suivre</Text>
+          <Heading mb={2} color={sectionText}>🔍 Découvrir</Heading>
+          <Text color={mutedText}>Trouvez de nouveaux utilisateurs à suivre</Text>
         </Box>
 
         {/* Barre de recherche */}
-        <Box bg="white" p={4} borderRadius="lg" shadow="sm">
+        <Box bg={cardBg} p={4} borderRadius="lg" shadow="sm">
           <InputGroup size="lg">
             <InputLeftElement pointerEvents="none">
-              <SearchIcon color="gray.400" />
+              <SearchIcon color={mutedText} />
             </InputLeftElement>
             <Input
               placeholder="Rechercher un utilisateur..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
+              bg={surfaceBg}
+              color={searchText}
+              border="1px solid"
+              borderColor={searchBorder}
+              _placeholder={{ color: searchPlaceholder }}
+              _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px #3182CE' }}
             />
           </InputGroup>
         </Box>
@@ -235,7 +251,7 @@ export const Discover = () => {
         {/* Résultats de recherche */}
         {searchQuery && (
           <Box>
-            <Heading size="md" mb={4}>
+            <Heading size="md" mb={4} color={sectionText}>
               Résultats de recherche
             </Heading>
             {searchLoading ? (
@@ -249,9 +265,9 @@ export const Discover = () => {
                 ))}
               </SimpleGrid>
             ) : (
-              <Box bg="gray.50" p={8} borderRadius="lg" textAlign="center">
+              <Box bg={emptyStateBg} p={8} borderRadius="lg" textAlign="center">
                 <Text fontSize="3xl" mb={2}>🔍</Text>
-                <Text color="gray.600">Aucun utilisateur trouvé</Text>
+                <Text color={mutedText}>Aucun utilisateur trouvé</Text>
               </Box>
             )}
           </Box>
@@ -260,7 +276,7 @@ export const Discover = () => {
         {/* Suggestions */}
         {!searchQuery && (
           <Box>
-            <Heading size="md" mb={4}>
+            <Heading size="md" mb={4} color={sectionText}>
               Suggestions pour vous
             </Heading>
             {loading ? (
@@ -274,10 +290,10 @@ export const Discover = () => {
                 ))}
               </SimpleGrid>
             ) : (
-              <Box bg="gray.50" p={8} borderRadius="lg" textAlign="center">
+              <Box bg={emptyStateBg} p={8} borderRadius="lg" textAlign="center">
                 <Text fontSize="3xl" mb={2}>👥</Text>
-                <Text color="gray.600">Aucune suggestion disponible</Text>
-                <Text fontSize="sm" color="gray.500" mt={2}>
+                <Text color={mutedText}>Aucune suggestion disponible</Text>
+                <Text fontSize="sm" color={mutedText} mt={2}>
                   Revenez plus tard pour découvrir de nouveaux utilisateurs
                 </Text>
               </Box>

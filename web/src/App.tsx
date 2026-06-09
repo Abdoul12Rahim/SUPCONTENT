@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import { Box } from '@chakra-ui/react';
+import { Box, useColorModeValue } from '@chakra-ui/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -28,13 +28,15 @@ import { ReviewDetail } from './pages/ReviewDetail';
 import { AchievementListener } from './components/Common/AchievementListener';
 
 function App() {
+  const appBg = useColorModeValue('gray.50', 'gray.900');
+
   return (
     <LanguageProvider>
       <AuthProvider>
         <SocketProvider>
           <ThemeProvider>
             <AchievementListener />
-            <Box minH="100vh" bg="gray.50">
+            <Box minH="100vh" bg={appBg} transition="background-color 0.2s ease">
               <Header />
               <Routes>
               <Route path="/" element={<Home />} />

@@ -20,6 +20,7 @@ import {
   FormLabel,
   IconButton,
   Tooltip,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { StarIcon, RepeatIcon } from '@chakra-ui/icons';
 import { useState, useEffect } from 'react';
@@ -58,6 +59,10 @@ export const ReviewSection = ({ contentId }: ReviewSectionProps) => {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const toast = useToast();
+  const emptyStateBg = useColorModeValue('gray.50', 'gray.800');
+  const reviewCardBg = useColorModeValue('white', 'gray.800');
+  const reviewTextColor = useColorModeValue('gray.700', 'gray.200');
+  const metaTextColor = useColorModeValue('gray.500', 'gray.400');
 
   useEffect(() => {
     fetchReviews();
@@ -274,7 +279,7 @@ export const ReviewSection = ({ contentId }: ReviewSectionProps) => {
                   rows={6}
                   maxLength={5000}
                 />
-                <Text fontSize="xs" color="gray.500" mt={1}>
+                <Text fontSize="xs" color={metaTextColor} mt={1}>
                   {reviewText.length}/5000 caractères (minimum 3)
                 </Text>
               </FormControl>
@@ -299,7 +304,7 @@ export const ReviewSection = ({ contentId }: ReviewSectionProps) => {
             {t('loading')}
           </Text>
         ) : reviews.length === 0 ? (
-          <Box textAlign="center" py={10} bg="gray.50" borderRadius="lg">
+          <Box textAlign="center" py={10} bg={emptyStateBg} borderRadius="lg">
             <Text color="gray.600" fontSize="lg">
               {t('noReviews')}
             </Text>
@@ -309,7 +314,7 @@ export const ReviewSection = ({ contentId }: ReviewSectionProps) => {
           </Box>
         ) : (
           reviews.map((review) => (
-            <Box key={review._id} p={6} bg="white" borderRadius="lg" shadow="sm">
+            <Box key={review._id} p={6} bg={reviewCardBg} borderRadius="lg" shadow="sm">
               <HStack align="start" spacing={4}>
                 <Avatar
                   size="md"
@@ -322,14 +327,14 @@ export const ReviewSection = ({ contentId }: ReviewSectionProps) => {
                       <Text fontWeight="bold">
                         {review.user.displayName || review.user.username}
                       </Text>
-                      <Text fontSize="sm" color="gray.500">
+                      <Text fontSize="sm" color={metaTextColor}>
                         {new Date(review.createdAt).toLocaleDateString('fr-FR')}
                       </Text>
                     </VStack>
                     {renderStars(review.rating)}
                   </HStack>
 
-                  <Text color="gray.700">{review.text}</Text>
+                  <Text color={reviewTextColor}>{review.text}</Text>
 
                   <HStack spacing={4} pt={2}>
                     <Button

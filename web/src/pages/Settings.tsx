@@ -20,7 +20,8 @@ import {
   Tab,
   TabPanel,
   Switch,
-  Select
+  Select,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { EditIcon, CloseIcon } from '@chakra-ui/icons';
 import { useState, useEffect, useRef } from 'react';
@@ -61,6 +62,15 @@ export const Settings = () => {
   const [publicLibrary, setPublicLibrary] = useState(true);
   const [publicReviews, setPublicReviews] = useState(true);
   const [defaultListPublic, setDefaultListPublic] = useState(false);
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const tabBg = useColorModeValue('gray.50', 'gray.700');
+  const tabSelectedBg = useColorModeValue('white', 'gray.800');
+  const inputBg = useColorModeValue('gray.50', 'gray.700');
+  const surfaceBg = useColorModeValue('gray.50', 'gray.900');
+  const mutedText = useColorModeValue('gray.600', 'gray.400');
+  const bodyText = useColorModeValue('gray.700', 'gray.200');
+  const dangerBg = useColorModeValue('red.50', 'red.900');
+  const dangerBorder = useColorModeValue('red.200', 'red.700');
 
   // Rediriger vers l'accueil si l'utilisateur n'est pas authentifié
   useEffect(() => {
@@ -191,21 +201,21 @@ export const Settings = () => {
       <VStack spacing={6} align="stretch">
         <Box>
           <Heading size="lg">Paramètres</Heading>
-          <Text color="gray.600" mt={1}>Gérez votre compte et vos préférences</Text>
+          <Text color={mutedText} mt={1}>Gérez votre compte et vos préférences</Text>
         </Box>
 
         <Tabs colorScheme="gray" variant="soft-rounded">
-          <TabList bg="gray.50" p={2} borderRadius="lg" flexWrap="wrap">
-            <Tab _selected={{ bg: 'white', fontWeight: 'semibold' }}>
+          <TabList bg={tabBg} p={2} borderRadius="lg" flexWrap="wrap">
+            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
               👤 Profil
             </Tab>
-            <Tab _selected={{ bg: 'white', fontWeight: 'semibold' }}>
+            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
               🔔 Notifications
             </Tab>
-            <Tab _selected={{ bg: 'white', fontWeight: 'semibold' }}>
+            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
               🔒 Confidentialité
             </Tab>
-            <Tab _selected={{ bg: 'white', fontWeight: 'semibold' }}>
+            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
               📥 Données
             </Tab>
           </TabList>
@@ -215,11 +225,11 @@ export const Settings = () => {
             <TabPanel px={0}>
               <VStack spacing={6} align="stretch">
                 {/* Informations du profil */}
-                <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+                <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
                   <VStack spacing={4} align="stretch">
                     <Box>
                       <Heading size="md" mb={1}>Informations du profil</Heading>
-                      <Text fontSize="sm" color="gray.600">Mettez à jour vos informations personnelles</Text>
+                      <Text fontSize="sm" color={mutedText}>Mettez à jour vos informations personnelles</Text>
                     </Box>
 
                     {/* Avatar */}
@@ -237,7 +247,7 @@ export const Settings = () => {
                       <Input 
                         value={username} 
                         onChange={(e) => setUsername(e.target.value)}
-                        bg="gray.50"
+                        bg={inputBg}
                       />
                     </FormControl>
 
@@ -247,7 +257,7 @@ export const Settings = () => {
                         value={user?.email || ''} 
                         type="email" 
                         isDisabled 
-                        bg="gray.50"
+                        bg={inputBg}
                       />
                     </FormControl>
 
@@ -258,7 +268,7 @@ export const Settings = () => {
                         onChange={(e) => setBio(e.target.value)}
                         placeholder="Utilisateur de démonstration" 
                         rows={3}
-                        bg="gray.50"
+                        bg={inputBg}
                       />
                     </FormControl>
 
@@ -277,11 +287,11 @@ export const Settings = () => {
                 </Box>
 
                 {/* Changement de mot de passe */}
-                <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+                <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
                   <VStack spacing={4} align="stretch">
                     <Box>
                       <Heading size="md" mb={1}>Mot de passe</Heading>
-                      <Text fontSize="sm" color="gray.600">Modifiez votre mot de passe</Text>
+                      <Text fontSize="sm" color={mutedText}>Modifiez votre mot de passe</Text>
                     </Box>
 
                     <FormControl>
@@ -290,7 +300,7 @@ export const Settings = () => {
                         type="password" 
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        bg="gray.50"
+                        bg={inputBg}
                       />
                     </FormControl>
 
@@ -300,7 +310,7 @@ export const Settings = () => {
                         type="password" 
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        bg="gray.50"
+                        bg={inputBg}
                       />
                     </FormControl>
 
@@ -310,7 +320,7 @@ export const Settings = () => {
                         type="password" 
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        bg="gray.50"
+                        bg={inputBg}
                       />
                     </FormControl>
 
@@ -330,11 +340,11 @@ export const Settings = () => {
                 </Box>
 
                 {/* Langue */}
-                <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+                <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
                   <VStack spacing={4} align="stretch">
                     <Box>
                       <Heading size="md" mb={1}>Langue</Heading>
-                      <Text fontSize="sm" color="gray.600">Choisissez votre langue préférée</Text>
+                      <Text fontSize="sm" color={mutedText}>Choisissez votre langue préférée</Text>
                     </Box>
 
                     <FormControl>
@@ -342,7 +352,7 @@ export const Settings = () => {
                       <Select
                         value={language}
                         onChange={(e) => setLanguage(e.target.value as any)}
-                        bg="gray.50"
+                        bg={inputBg}
                         fontWeight="medium"
                       >
                         <option value="fr">🇫🇷 Français</option>
@@ -357,18 +367,18 @@ export const Settings = () => {
 
             {/* Onglet Notifications */}
             <TabPanel px={0}>
-              <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+              <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
                 <VStack spacing={6} align="stretch">
                   <Box>
                     <Heading size="md" mb={1}>Préférences de notification</Heading>
-                    <Text fontSize="sm" color="gray.600">Choisissez comment vous souhaitez être notifié</Text>
+                    <Text fontSize="sm" color={mutedText}>Choisissez comment vous souhaitez être notifié</Text>
                   </Box>
 
                   <VStack spacing={4} align="stretch">
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Nouveaux likes</Text>
-                        <Text fontSize="sm" color="gray.600">Recevez une notification quand quelqu'un aime votre critique</Text>
+                        <Text fontSize="sm" color={mutedText}>Recevez une notification quand quelqu'un aime votre critique</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -383,7 +393,7 @@ export const Settings = () => {
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Nouveaux commentaires</Text>
-                        <Text fontSize="sm" color="gray.600">Recevez une notification pour les nouveaux commentaires</Text>
+                        <Text fontSize="sm" color={mutedText}>Recevez une notification pour les nouveaux commentaires</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -398,7 +408,7 @@ export const Settings = () => {
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Nouveaux abonnés</Text>
-                        <Text fontSize="sm" color="gray.600">Soyez notifié quand quelqu'un vous suit</Text>
+                        <Text fontSize="sm" color={mutedText}>Soyez notifié quand quelqu'un vous suit</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -413,7 +423,7 @@ export const Settings = () => {
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Recommandations</Text>
-                        <Text fontSize="sm" color="gray.600">Recevez des suggestions d'œuvres basées sur vos goûts</Text>
+                        <Text fontSize="sm" color={mutedText}>Recevez des suggestions d'œuvres basées sur vos goûts</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -428,7 +438,7 @@ export const Settings = () => {
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Newsletter</Text>
-                        <Text fontSize="sm" color="gray.600">Recevez notre newsletter hebdomadaire</Text>
+                        <Text fontSize="sm" color={mutedText}>Recevez notre newsletter hebdomadaire</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -444,18 +454,18 @@ export const Settings = () => {
 
             {/* Onglet Confidentialité */}
             <TabPanel px={0}>
-              <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+              <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
                 <VStack spacing={6} align="stretch">
                   <Box>
                     <Heading size="md" mb={1}>Confidentialité</Heading>
-                    <Text fontSize="sm" color="gray.600">Gérez la visibilité de votre profil et de vos données</Text>
+                    <Text fontSize="sm" color={mutedText}>Gérez la visibilité de votre profil et de vos données</Text>
                   </Box>
 
                   <VStack spacing={4} align="stretch">
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Profil public</Text>
-                        <Text fontSize="sm" color="gray.600">Votre profil est visible par tous les utilisateurs</Text>
+                        <Text fontSize="sm" color={mutedText}>Votre profil est visible par tous les utilisateurs</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -470,7 +480,7 @@ export const Settings = () => {
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Bibliothèque publique</Text>
-                        <Text fontSize="sm" color="gray.600">Les autres peuvent voir vos œuvres</Text>
+                        <Text fontSize="sm" color={mutedText}>Les autres peuvent voir vos œuvres</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -485,7 +495,7 @@ export const Settings = () => {
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Critiques publiques</Text>
-                        <Text fontSize="sm" color="gray.600">Vos critiques sont visibles par tous</Text>
+                        <Text fontSize="sm" color={mutedText}>Vos critiques sont visibles par tous</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -500,7 +510,7 @@ export const Settings = () => {
                     <HStack justify="space-between" py={2}>
                       <Box>
                         <Text fontWeight="medium">Listes publiques par défaut</Text>
-                        <Text fontSize="sm" color="gray.600">Les nouvelles listes sont publiques</Text>
+                        <Text fontSize="sm" color={mutedText}>Les nouvelles listes sont publiques</Text>
                       </Box>
                       <Switch 
                         size="lg" 
@@ -517,11 +527,11 @@ export const Settings = () => {
             {/* Onglet Données */}
             <TabPanel px={0}>
               <VStack spacing={6} align="stretch">
-                <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+                <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
                   <VStack spacing={4} align="stretch">
                     <Box>
                       <Heading size="md" mb={1}>Exporter vos données</Heading>
-                      <Text fontSize="sm" color="gray.600">Téléchargez une copie de toutes vos données</Text>
+                      <Text fontSize="sm" color={mutedText}>Téléchargez une copie de toutes vos données</Text>
                     </Box>
 
                     <Button 
@@ -534,14 +544,14 @@ export const Settings = () => {
                   </VStack>
                 </Box>
 
-                <Box bg="red.50" p={6} borderRadius="lg" border="1px" borderColor="red.200">
+                <Box bg={dangerBg} p={6} borderRadius="lg" border="1px" borderColor={dangerBorder}>
                   <VStack spacing={6} align="stretch">
                     <Box>
-                      <Heading size="md" mb={1} color="red.600">Zone de danger</Heading>
-                      <Text fontSize="sm" color="red.700">Actions irréversibles sur votre compte</Text>
+                      <Heading size="md" mb={1} color={useColorModeValue('red.600', 'red.300')}>Zone de danger</Heading>
+                      <Text fontSize="sm" color={useColorModeValue('red.700', 'red.200')}>Actions irréversibles sur votre compte</Text>
                     </Box>
 
-                    <Divider borderColor="red.200" />
+                    <Divider borderColor={dangerBorder} />
 
                     <Box>
                       <Text fontWeight="medium" mb={2}>Supprimer toutes mes critiques</Text>
@@ -554,11 +564,11 @@ export const Settings = () => {
                       </Button>
                     </Box>
 
-                    <Divider borderColor="red.200" />
+                    <Divider borderColor={dangerBorder} />
 
                     <Box>
                       <Text fontWeight="medium" mb={1}>Supprimer mon compte</Text>
-                      <Text fontSize="sm" color="red.700" mb={3}>
+                      <Text fontSize="sm" color={useColorModeValue('red.700', 'red.200')} mb={3}>
                         Cette action est définitive et supprimera toutes vos données
                       </Text>
                       <Button 

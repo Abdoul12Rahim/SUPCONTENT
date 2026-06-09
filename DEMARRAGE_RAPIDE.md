@@ -132,6 +132,8 @@ docker exec -it supcontent-mongo mongosh supcontent
 ### Frontend ne se connecte pas au Backend
 → Vérifier que REACT_APP_API_URL est correct dans le .env du web
 
+### Erreur "Cannot parse an empty JSON string"
+
 ## 📚 Prochaines étapes
 
 1. **Créer un compte** sur http://localhost:3000/register
