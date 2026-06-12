@@ -404,7 +404,9 @@ export const Profile = () => {
                 </HStack>
                 <HStack spacing={2}>
                   <CalendarIcon fontSize="sm" />
-                  <Text fontSize="sm" fontWeight="medium">Membre depuis 2024</Text>
+                  <Text fontSize="sm" fontWeight="medium">
+                    Membre depuis {user.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}
+                  </Text>
                 </HStack>
               </HStack>
             </VStack>
