@@ -24,8 +24,18 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     setIsDark(colorMode === 'dark');
   }, [colorMode]);
 
+  // Keep the whole app in dark mode to preserve contrast with the new dark palette.
+  useEffect(() => {
+    if (colorMode !== 'dark') {
+      toggleColorMode();
+    }
+  }, [colorMode, toggleColorMode]);
+
   const toggleTheme = () => {
-    toggleColorMode();
+    // Dark-only theme: ignore toggles that would bring low-contrast light surfaces back.
+    if (colorMode !== 'dark') {
+      toggleColorMode();
+    }
   };
 
   return (

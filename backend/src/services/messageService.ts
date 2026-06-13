@@ -120,7 +120,12 @@ export class MessageService {
   /**
    * Envoyer un message
    */
-  async sendMessage(conversationId: string, senderId: string, content: string): Promise<any> {
+  async sendMessage(
+    conversationId: string,
+    senderId: string,
+    content: string,
+    options?: { messageType?: 'text' | 'voice'; audioUrl?: string; audioDuration?: number; audioMimeType?: string }
+  ): Promise<any> {
     // Vérifier que la conversation existe et que l'utilisateur en fait partie
     const conversation = await Conversation.findOne({
       _id: conversationId,
@@ -131,11 +136,25 @@ export class MessageService {
       throw new Error('Conversation non trouvée ou accès non autorisé');
     }
 
+    const messageType = options?.messageType || 'text';
+
+    if (messageType === 'text' && (!content || content.trim().length === 0)) {
+      throw new Error('Le message ne peut pas être vide');
+    }
+
+    if (messageType === 'voice' && !options?.audioUrl) {
+      throw new Error('URL audio manquante pour la note vocale');
+    }
+
     // Créer le message
     const message = await Message.create({
       conversation: conversationId,
       sender: senderId,
-      content,
+      content: messageType === 'voice' ? '[Note vocale]' : content,
+      messageType,
+      audioUrl: options?.audioUrl,
+      audioMimeType: options?.audioMimeType,
+      audioDuration: options?.audioDuration,
       read: false,
     });
 

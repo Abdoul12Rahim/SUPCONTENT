@@ -39,7 +39,6 @@ import { getAvatarUrl } from '../utils/avatar';
 import { GameCard } from '../components/Content/GameCard';
 import { Loading } from '../components/Common/Loading';
 import { AchievementsSection } from '../components/Profile/AchievementsSection';
-import { useColorModeValue } from '@chakra-ui/react';
 
 interface UserStats {
   libraryCount: number;
@@ -118,12 +117,12 @@ export const Profile = () => {
   const [libraryGames, setLibraryGames] = useState<LibraryGame[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [loadingLibrary, setLoadingLibrary] = useState(false);
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const surfaceBg = useColorModeValue('gray.50', 'gray.900');
-  const tabBg = useColorModeValue('gray.50', 'gray.700');
-  const tabSelectedBg = useColorModeValue('white', 'gray.800');
-  const mutedText = useColorModeValue('gray.600', 'gray.400');
-  const bodyText = useColorModeValue('gray.700', 'gray.200');
+  const cardBg = 'ui.card';
+  const surfaceBg = 'ui.bg';
+  const tabBg = 'ui.cardElevated';
+  const tabSelectedBg = 'ui.card';
+  const mutedText = 'ui.mutetext';
+  const bodyText = 'ui.text';
 
   // Rediriger vers l'accueil si l'utilisateur n'est pas authentifié
   useEffect(() => {
@@ -311,12 +310,15 @@ export const Profile = () => {
         },
       });
 
+      const uploadedAvatar = response.data.avatar;
+      const avatarWithVersion = `${uploadedAvatar}${uploadedAvatar.includes('?') ? '&' : '?'}v=${Date.now()}`;
+
       // Mettre à jour l'utilisateur local avec le nouvel avatar
       if (updateUser && user?._id) {
         updateUser({ 
           ...user, 
           _id: user._id, 
-          avatar: response.data.avatar 
+          avatar: avatarWithVersion 
         });
       }
 
@@ -383,12 +385,12 @@ export const Profile = () => {
               <Text color={mutedText}>{user.email}</Text>
               {user.bio && <Text color={bodyText} mt={2}>{user.bio}</Text>}
               
-              <HStack spacing={6} pt={2} color="gray.700">
+              <HStack spacing={6} pt={2} color="ui.text">
                 <HStack 
                   spacing={2} 
                   cursor="pointer"
                   onClick={() => setModalType('followers')}
-                  _hover={{ color: 'gray.900' }}
+                  _hover={{ color: '#ddd6fe' }}
                 >
                   <Text fontSize="sm">👥</Text>
                   <Text fontSize="sm" fontWeight="medium">{stats.followersCount} abonnés</Text>
@@ -397,7 +399,7 @@ export const Profile = () => {
                   spacing={2}
                   cursor="pointer"
                   onClick={() => setModalType('following')}
-                  _hover={{ color: 'gray.900' }}
+                  _hover={{ color: '#ddd6fe' }}
                 >
                   <Text fontSize="sm">👤</Text>
                   <Text fontSize="sm" fontWeight="medium">{stats.followingCount} abonnements</Text>
@@ -413,34 +415,34 @@ export const Profile = () => {
           </HStack>
 
           {/* Section des statistiques principales */}
-          <HStack spacing={0} justify="center" mt={8} pt={6} borderTop="1px" borderColor={useColorModeValue('gray.200', 'gray.600')}>
+          <HStack spacing={0} justify="center" mt={8} pt={6} borderTop="1px" borderColor="ui.border">
             <Box textAlign="center" flex={1}>
-              <Heading size="sm" color="gray.600" mb={1}>Critiques</Heading>
+              <Heading size="sm" color="ui.mutetext" mb={1}>Critiques</Heading>
               <HStack justify="center" spacing={2}>
-                <Heading size="2xl">{stats.reviewCount}</Heading>
-                <Text fontSize="lg" color="gray.600" mt={2}>Jeux</Text>
+                <Heading size="2xl" color="ui.text">{stats.reviewCount}</Heading>
+                <Text fontSize="lg" color="ui.mutetext" mt={2}>Jeux</Text>
               </HStack>
             </Box>
             <Box textAlign="center" flex={1}>
-              <Heading size="sm" color="gray.600" mb={1}>Note moyenne</Heading>
-              <Heading size="2xl">{averageRating.toFixed(1)}</Heading>
+              <Heading size="sm" color="ui.mutetext" mb={1}>Note moyenne</Heading>
+              <Heading size="2xl" color="ui.text">{averageRating.toFixed(1)}</Heading>
             </Box>
           </HStack>
         </Box>
 
         {/* Onglets */}
-        <Tabs colorScheme="gray" variant="soft-rounded">
+        <Tabs colorScheme="purple" variant="soft-rounded">
           <TabList bg={tabBg} p={2} borderRadius="lg">
-            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
+            <Tab color="ui.mutetext" _selected={{ bg: tabSelectedBg, color: 'ui.text', fontWeight: 'semibold' }}>
               Critiques ({stats.reviewCount})
             </Tab>
-            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
+            <Tab color="ui.mutetext" _selected={{ bg: tabSelectedBg, color: 'ui.text', fontWeight: 'semibold' }}>
               Collection ({stats.libraryCount})
             </Tab>
-            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
+            <Tab color="ui.mutetext" _selected={{ bg: tabSelectedBg, color: 'ui.text', fontWeight: 'semibold' }}>
               Achievements
             </Tab>
-            <Tab _selected={{ bg: tabSelectedBg, fontWeight: 'semibold' }}>
+            <Tab color="ui.mutetext" _selected={{ bg: tabSelectedBg, color: 'ui.text', fontWeight: 'semibold' }}>
               Statistiques
             </Tab>
           </TabList>
@@ -485,10 +487,10 @@ export const Profile = () => {
                                 <Text fontWeight="bold">{review.rating}/5</Text>
                               </HStack>
                             </HStack>
-                            <Text fontSize="sm" color="gray.600" noOfLines={2}>
+                            <Text fontSize="sm" color="ui.mutetext" noOfLines={2}>
                               {review.text}
                             </Text>
-                            <HStack spacing={4} fontSize="xs" color="gray.500">
+                            <HStack spacing={4} fontSize="xs" color="ui.mutetext">
                               <Text>❤️ {review.likes} likes</Text>
                               <Text>{new Date(review.createdAt).toLocaleDateString('fr-FR')}</Text>
                             </HStack>
@@ -501,7 +503,7 @@ export const Profile = () => {
                   <Center py={8}>
                     <VStack spacing={3}>
                       <Text fontSize="3xl">✍️</Text>
-                      <Text color="gray.500">Aucune critique pour le moment</Text>
+                      <Text color="ui.mutetext">Aucune critique pour le moment</Text>
                       <Button 
                         size="sm" 
                         colorScheme="blue" 
@@ -543,7 +545,7 @@ export const Profile = () => {
                   <Center py={8}>
                     <VStack spacing={3}>
                       <Text fontSize="3xl">📚</Text>
-                      <Text color="gray.500">Votre collection est vide</Text>
+                      <Text color="ui.mutetext">Votre collection est vide</Text>
                       <Button 
                         size="sm" 
                         colorScheme="blue" 
@@ -597,7 +599,7 @@ export const Profile = () => {
                     <Center py={8}>
                       <VStack spacing={2}>
                         <Text fontSize="2xl">📊</Text>
-                        <Text color="gray.500" fontSize="sm">Aucune donnée disponible</Text>
+                        <Text color="ui.mutetext" fontSize="sm">Aucune donnée disponible</Text>
                       </VStack>
                     </Center>
                   )}
@@ -629,7 +631,7 @@ export const Profile = () => {
                     <Center py={8}>
                       <VStack spacing={2}>
                         <Text fontSize="2xl">📝</Text>
-                        <Text color="gray.500" fontSize="sm">Aucune activité récente</Text>
+                        <Text color="ui.mutetext" fontSize="sm">Aucune activité récente</Text>
                       </VStack>
                     </Center>
                   )}

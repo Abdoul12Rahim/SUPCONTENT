@@ -10,12 +10,16 @@ export const getAvatarUrl = (avatar?: string): string | undefined => {
   if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
     return avatar;
   }
-  
-  // Sinon, c'est un chemin local, ajouter l'URL de base de l'API
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-  
-  // Si le chemin commence déjà par /, l'utiliser tel quel
-  const avatarPath = avatar.startsWith('/') ? avatar : `/${avatar}`;
-  
-  return `${apiUrl}${avatarPath}`;
+
+  // Build a stable origin even when VITE_API_URL ends with /api
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const origin = apiUrl.replace(/\/api\/?$/, '');
+
+  // Normalize paths so both /uploads/... and /api/uploads/... work
+  let avatarPath = avatar.startsWith('/') ? avatar : `/${avatar}`;
+  if (avatarPath.startsWith('/api/uploads/')) {
+    avatarPath = avatarPath.replace('/api/uploads/', '/uploads/');
+  }
+
+  return `${origin}${avatarPath}`;
 };

@@ -95,6 +95,55 @@ export const sendMessage = async (req: Request, res: Response) => {
 };
 
 /**
+ * Uploader une note vocale et envoyer un message vocal
+ */
+export const sendVoiceNote = async (req: Request, res: Response) => {
+  try {
+    const { conversationId } = req.params;
+    const audioDuration = req.body?.audioDuration ? Number(req.body.audioDuration) : undefined;
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Fichier audio manquant' });
+    }
+
+    const audioUrl = `/api/uploads/voice-notes/${req.file.filename}`;
+
+    const message = await messageService.sendMessage(conversationId, req.user!._id, '[Note vocale]', {
+      messageType: 'voice',
+      audioUrl,
+      audioMimeType: req.file.mimetype,
+      audioDuration: Number.isFinite(audioDuration) ? audioDuration : undefined,
+    });
+
+    // Récupérer la conversation pour obtenir l'autre participant
+    const Conversation = require('../models/Conversation').default;
+    const conversation = await Conversation.findById(conversationId).populate('participants');
+    const otherParticipant = conversation?.participants?.find(
+      (p: any) => p._id.toString() !== req.user!._id.toString()
+    );
+
+    if (otherParticipant) {
+      await notificationService.createNotification({
+        user: otherParticipant._id,
+        type: 'message',
+        from: req.user!._id,
+        reference: conversationId,
+        message: `${req.user!.displayName || req.user!.username} vous a envoyé une note vocale`,
+      });
+
+      io.to(`user_${otherParticipant._id}`).emit('new_message', {
+        conversationId,
+        message,
+      });
+    }
+
+    res.status(201).json(message);
+  } catch (error: any) {
+    res.status(error.statusCode || 400).json({ message: error.message });
+  }
+};
+
+/**
  * Marquer les messages d'une conversation comme lus
  */
 export const markAsRead = async (req: Request, res: Response) => {

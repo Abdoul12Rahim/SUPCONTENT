@@ -4,6 +4,10 @@ export interface IMessage extends Document {
   conversation: mongoose.Types.ObjectId;
   sender: mongoose.Types.ObjectId;
   content: string;
+  messageType: 'text' | 'voice';
+  audioUrl?: string;
+  audioMimeType?: string;
+  audioDuration?: number;
   read: boolean;
   readBy?: { user: mongoose.Types.ObjectId; readAt: Date }[];
   likedBy?: { user: mongoose.Types.ObjectId; likedAt: Date }[];
@@ -16,6 +20,10 @@ const messageSchema = new Schema<IMessage>(
     conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
     sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true, maxlength: 2000 },
+    messageType: { type: String, enum: ['text', 'voice'], default: 'text' },
+    audioUrl: { type: String },
+    audioMimeType: { type: String },
+    audioDuration: { type: Number },
     read: { type: Boolean, default: false },
     readBy: {
       type: [

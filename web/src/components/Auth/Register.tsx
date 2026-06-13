@@ -59,7 +59,17 @@ export const Register = () => {
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={8} p={6} borderWidth={1} borderRadius="lg" bg="white">
+    <Box
+      maxW="md"
+      mx="auto"
+      mt={8}
+      p={6}
+      borderWidth={1}
+      borderRadius="lg"
+      bg="ui.card"
+      borderColor="ui.border"
+      color="ui.text"
+    >
       <VStack spacing={4} as="form" onSubmit={handleSubmit} autoComplete="off">
         <Heading size="lg">Inscription</Heading>
         
@@ -93,23 +103,18 @@ export const Register = () => {
             placeholder="••••••••"
             autoComplete="new-password"
           />
-          <Text fontSize="xs" color="gray.500" mt={1}>
+          <Text fontSize="xs" color="ui.mutetext" mt={1}>
             Minimum 8 caractères
           </Text>
         </FormControl>
 
-        <Button
-          type="submit"
-          colorScheme="blue"
-          width="full"
-          isLoading={loading}
-        >
+        <Button type="submit" bg="#7c3aed" color="white" width="full" isLoading={loading} _hover={{ bg: '#6d28d9' }}>
           S'inscrire
         </Button>
 
         <Text fontSize="sm">
           Déjà un compte ?{' '}
-          <ChakraLink as={Link} to="/login" color="blue.500">
+          <ChakraLink as={Link} to="/login" color="#a78bfa">
             Se connecter
           </ChakraLink>
         </Text>

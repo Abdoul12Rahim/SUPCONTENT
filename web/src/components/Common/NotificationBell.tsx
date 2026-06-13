@@ -47,17 +47,17 @@ export const NotificationBell = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const menuBg = useColorModeValue('white', 'gray.800');
-  const menuBorder = useColorModeValue('gray.200', 'gray.700');
-  const headerText = useColorModeValue('gray.800', 'whiteAlpha.900');
-  const mutedText = useColorModeValue('gray.500', 'gray.400');
-  const unreadBg = useColorModeValue('blue.50', 'blue.900');
-  const unreadHoverBg = useColorModeValue('blue.100', 'blue.800');
-  const readBg = useColorModeValue('white', 'gray.800');
-  const readHoverBg = useColorModeValue('gray.50', 'gray.700');
-  const dividerColor = useColorModeValue('gray.200', 'gray.700');
-  const avatarNameColor = useColorModeValue('blue.600', 'blue.300');
-  const messageTextColor = useColorModeValue('gray.600', 'gray.300');
+  const menuBg = 'ui.card';
+  const menuBorder = 'ui.border';
+  const headerText = 'ui.text';
+  const mutedText = 'ui.mutetext';
+  const unreadBg = 'rgba(124,58,237,0.12)';
+  const unreadHoverBg = 'rgba(124,58,237,0.2)';
+  const readBg = 'ui.card';
+  const readHoverBg = 'ui.cardElevated';
+  const dividerColor = 'ui.border';
+  const avatarNameColor = '#a78bfa';
+  const messageTextColor = 'ui.mutetext';
 
   useEffect(() => {
     if (isOpen && isAuthenticated) {
@@ -205,6 +205,8 @@ export const NotificationBell = () => {
           </Box>
         }
         variant="ghost"
+        color="ui.text"
+        _hover={{ bg: 'rgba(124,58,237,0.15)' }}
         aria-label="Notifications"
       />
       <MenuList maxH="500px" overflowY="auto" w="400px" p={0} bg={menuBg} borderColor={menuBorder}>
@@ -223,7 +225,7 @@ export const NotificationBell = () => {
 
         {loading ? (
           <Box py={8} textAlign="center">
-            <Spinner size="lg" color="blue.500" />
+            <Spinner size="lg" color="brand.500" />
           </Box>
         ) : notifications.length === 0 ? (
           <Box py={8} textAlign="center">
@@ -274,7 +276,7 @@ export const NotificationBell = () => {
                       </Text>
                     </VStack>
                     {!notification.isRead && (
-                      <Box w="8px" h="8px" borderRadius="full" bg="blue.500" />
+                      <Box w="8px" h="8px" borderRadius="full" bg="brand.500" />
                     )}
                   </HStack>
                 </MenuItem>
@@ -292,7 +294,7 @@ export const NotificationBell = () => {
               <Button
                 w="full"
                 size="sm"
-                colorScheme="blue"
+                colorScheme="purple"
                 variant="ghost"
                 onClick={() => navigate('/notifications')}
                 color={headerText}

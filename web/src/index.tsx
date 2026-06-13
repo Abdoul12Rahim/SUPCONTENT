@@ -1,16 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ChakraProvider, ColorModeScript, extendTheme } from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import App from './App';
+import theme from './theme';
 
-const theme = extendTheme({
-  config: {
-    initialColorMode: 'light',
-    useSystemColorMode: false,
-  },
-});
+// Force dark mode globally to prevent low-contrast light surfaces from persisted settings.
+if (typeof window !== 'undefined') {
+  window.localStorage.setItem('chakra-ui-color-mode', 'dark');
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,7 +28,6 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <App />

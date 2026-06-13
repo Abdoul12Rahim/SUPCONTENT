@@ -46,6 +46,17 @@ export const Games = () => {
   const [selectedGenre, setSelectedGenre] = useState('Tous les genres');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const toast = useToast();
+  const C = {
+    panel: '#13131f',
+    panelElevated: '#1a1a2e',
+    border: 'rgba(255,255,255,0.08)',
+    text: '#f1f5f9',
+    muted: '#94a3b8',
+    primary: '#7c3aed',
+    primaryHover: '#6d28d9',
+    primarySoft: 'rgba(124,58,237,0.15)',
+    primaryBorder: 'rgba(124,58,237,0.35)',
+  };
 
   const platforms = [
     'Toutes les plateformes',
@@ -139,7 +150,7 @@ export const Games = () => {
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
         {/* Titre */}
-        <Heading size="xl" fontWeight="bold">
+        <Heading size="xl" fontWeight="bold" color={C.text}>
           Recherche
         </Heading>
 
@@ -147,17 +158,20 @@ export const Games = () => {
         <HStack spacing={4}>
           <InputGroup size="lg" flex={1}>
             <InputLeftElement pointerEvents="none">
-              <Icon as={SearchIcon} color="gray.400" />
+              <Icon as={SearchIcon} color={C.muted} />
             </InputLeftElement>
             <Input
               value={searchQuery}
               onChange={handleSearch}
               onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit()}
               placeholder="Rechercher un jeu, un développeur..."
-              bg="gray.50"
+              bg={C.panelElevated}
+              color={C.text}
               borderRadius="lg"
-              border="none"
-              _focus={{ bg: 'white', shadow: 'sm' }}
+              border="1px solid"
+              borderColor={C.border}
+              _placeholder={{ color: C.muted }}
+              _focus={{ borderColor: C.primaryBorder, boxShadow: 'none', bg: C.panelElevated }}
             />
           </InputGroup>
           <IconButton
@@ -165,28 +179,30 @@ export const Games = () => {
             icon={<ViewIcon />}
             size="lg"
             variant={viewMode === 'grid' ? 'solid' : 'ghost'}
-            colorScheme={viewMode === 'grid' ? 'gray' : 'gray'}
-            bg={viewMode === 'grid' ? 'gray.900' : 'transparent'}
-            color={viewMode === 'grid' ? 'white' : 'gray.600'}
+            bg={viewMode === 'grid' ? C.primary : C.panelElevated}
+            color={viewMode === 'grid' ? 'white' : C.muted}
+            border="1px solid"
+            borderColor={viewMode === 'grid' ? C.primary : C.border}
             onClick={() => setViewMode('grid')}
-            _hover={{ bg: viewMode === 'grid' ? 'gray.800' : 'gray.100' }}
+            _hover={{ bg: viewMode === 'grid' ? C.primaryHover : C.primarySoft, color: C.text }}
           />
           <IconButton
             aria-label="Vue liste"
             icon={<ViewOffIcon />}
             size="lg"
             variant={viewMode === 'list' ? 'solid' : 'ghost'}
-            colorScheme={viewMode === 'list' ? 'gray' : 'gray'}
-            bg={viewMode === 'list' ? 'gray.900' : 'transparent'}
-            color={viewMode === 'list' ? 'white' : 'gray.600'}
+            bg={viewMode === 'list' ? C.primary : C.panelElevated}
+            color={viewMode === 'list' ? 'white' : C.muted}
+            border="1px solid"
+            borderColor={viewMode === 'list' ? C.primary : C.border}
             onClick={() => setViewMode('list')}
-            _hover={{ bg: viewMode === 'list' ? 'gray.800' : 'gray.100' }}
+            _hover={{ bg: viewMode === 'list' ? C.primaryHover : C.primarySoft, color: C.text }}
           />
         </HStack>
 
         {/* Filtres */}
         <HStack spacing={4} align="center">
-          <Text fontSize="sm" color="gray.600" display="flex" alignItems="center">
+          <Text fontSize="sm" color={C.muted} display="flex" alignItems="center">
             <Icon as={SearchIcon} mr={2} boxSize={4} />
             Filtres :
           </Text>
@@ -196,22 +212,27 @@ export const Games = () => {
             <MenuButton
               as={Button}
               rightIcon={<ChevronDownIcon />}
-              bg="gray.100"
-              _hover={{ bg: 'gray.200' }}
-              _active={{ bg: 'gray.200' }}
+              bg={C.panelElevated}
+              color={C.text}
+              border="1px solid"
+              borderColor={C.border}
+              _hover={{ bg: C.primarySoft }}
+              _active={{ bg: C.primarySoft }}
               borderRadius="lg"
               fontWeight="normal"
             >
               {selectedPlatform}
             </MenuButton>
-            <MenuList maxH="400px" overflowY="auto">
+            <MenuList maxH="400px" overflowY="auto" bg={C.panel} borderColor={C.border}>
               {platforms.map((platform) => (
                 <MenuItem
                   key={platform}
                   onClick={() => setSelectedPlatform(platform)}
-                  bg={selectedPlatform === platform ? 'blue.50' : 'transparent'}
+                  color={C.text}
+                  bg={selectedPlatform === platform ? C.primarySoft : 'transparent'}
                   fontWeight={selectedPlatform === platform ? 'bold' : 'normal'}
                   icon={selectedPlatform === platform ? <Text>✓</Text> : undefined}
+                  _hover={{ bg: C.primarySoft }}
                 >
                   {platform}
                 </MenuItem>
@@ -224,22 +245,27 @@ export const Games = () => {
             <MenuButton
               as={Button}
               rightIcon={<ChevronDownIcon />}
-              bg="gray.100"
-              _hover={{ bg: 'gray.200' }}
-              _active={{ bg: 'gray.200' }}
+              bg={C.panelElevated}
+              color={C.text}
+              border="1px solid"
+              borderColor={C.border}
+              _hover={{ bg: C.primarySoft }}
+              _active={{ bg: C.primarySoft }}
               borderRadius="lg"
               fontWeight="normal"
             >
               {selectedGenre}
             </MenuButton>
-            <MenuList maxH="400px" overflowY="auto">
+            <MenuList maxH="400px" overflowY="auto" bg={C.panel} borderColor={C.border}>
               {genres.map((genre) => (
                 <MenuItem
                   key={genre}
                   onClick={() => setSelectedGenre(genre)}
-                  bg={selectedGenre === genre ? 'blue.50' : 'transparent'}
+                  color={C.text}
+                  bg={selectedGenre === genre ? C.primarySoft : 'transparent'}
                   fontWeight={selectedGenre === genre ? 'bold' : 'normal'}
                   icon={selectedGenre === genre ? <Text>✓</Text> : undefined}
+                  _hover={{ bg: C.primarySoft }}
                 >
                   {genre}
                 </MenuItem>
@@ -249,7 +275,7 @@ export const Games = () => {
         </HStack>
 
         {/* Compteur de résultats */}
-        <Text fontSize="sm" color="gray.600">
+        <Text fontSize="sm" color={C.muted}>
           {games.length} résultats
         </Text>
 
@@ -260,7 +286,7 @@ export const Games = () => {
           <>
             {games.length === 0 ? (
               <Box textAlign="center" py={20}>
-                <Text fontSize="lg" color="gray.500">
+                <Text fontSize="lg" color={C.muted}>
                   Aucun jeu trouvé
                 </Text>
               </Box>
@@ -290,16 +316,16 @@ export const Games = () => {
                   <Button
                     onClick={handlePrevPage}
                     isDisabled={currentPage === 1}
-                    colorScheme="blue"
+                    colorScheme="brand"
                     variant="outline"
                     size="sm"
                   >
                     Précédent
                   </Button>
-                  <Text fontSize="sm">Page {currentPage}</Text>
+                  <Text fontSize="sm" color={C.text}>Page {currentPage}</Text>
                   <Button
                     onClick={handleNextPage}
-                    colorScheme="blue"
+                    colorScheme="brand"
                     variant="outline"
                     size="sm"
                   >

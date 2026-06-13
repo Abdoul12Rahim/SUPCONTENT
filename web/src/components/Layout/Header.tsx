@@ -11,11 +11,10 @@ import {
   MenuList,
   MenuItem,
   MenuDivider,
+  Icon,
   IconButton,
-  useColorMode,
-  useColorModeValue,
 } from '@chakra-ui/react';
-import { SearchIcon, SettingsIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
+import { SearchIcon, BellIcon, SettingsIcon } from '@chakra-ui/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -27,15 +26,9 @@ import { Badge } from '@chakra-ui/react';
 export const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const { t } = useLanguage();
-  const { colorMode, toggleColorMode } = useColorMode();
   const location = useLocation();
   const navigate = useNavigate();
   const { unreadCount } = useUnreadMessages();
-  const headerBg = useColorModeValue('white', 'gray.800');
-  const headerBorder = useColorModeValue('gray.100', 'gray.700');
-  const primaryText = useColorModeValue('gray.800', 'whiteAlpha.900');
-  const navText = useColorModeValue('gray.600', 'gray.300');
-  const navTextActive = useColorModeValue('gray.900', 'white');
 
   const handleLogout = () => {
     logout();
@@ -48,16 +41,29 @@ export const Header = () => {
     return false;
   };
   
+  const navColor = '#94a3b8';
+  const navActive = '#a78bfa';
+
   return (
-    <Box bg={headerBg} px={4} shadow="sm" position="sticky" top={0} zIndex={10} borderBottom="1px" borderColor={headerBorder}>
+    <Box
+      bg="rgba(13,13,20,0.95)"
+      backdropFilter="saturate(140%) blur(8px)"
+      px={4}
+      shadow="sm"
+      position="sticky"
+      top={0}
+      zIndex={10}
+      borderBottom="1px"
+      borderColor="rgba(124,58,237,0.25)"
+    >
       <Container maxW="container.xl">
         <Flex h={16} alignItems="center" justifyContent="space-between">
           <HStack spacing={8}>
             <Link to="/">
               <HStack spacing={2}>
                 <Text fontSize="3xl">🎮</Text>
-                <Text fontSize="xl" fontWeight="bold" color={primaryText}>
-                  UNIVERS GAME
+                <Text fontSize="xl" fontWeight="bold" color="#a78bfa">
+                  SUPCONTENT
                 </Text>
               </HStack>
             </Link>
@@ -67,8 +73,8 @@ export const Header = () => {
                 <Button 
                   variant="ghost"
                   fontWeight={isActive('/') ? 'bold' : 'normal'}
-                  color={isActive('/') ? navTextActive : navText}
-                  _hover={{ color: navTextActive }}
+                  color={isActive('/') ? navActive : navColor}
+                  _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
                 >
                   🏠 Accueil
                 </Button>
@@ -77,8 +83,8 @@ export const Header = () => {
                 <Button 
                   variant="ghost"
                   fontWeight={isActive('/games') ? 'bold' : 'normal'}
-                  color={isActive('/games') ? navTextActive : navText}
-                  _hover={{ color: navTextActive }}
+                  color={isActive('/games') ? navActive : navColor}
+                  _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
                   leftIcon={<SearchIcon />}
                 >
                   Recherche
@@ -92,23 +98,60 @@ export const Header = () => {
                       as={Button}
                       variant="ghost"
                       fontWeight={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? 'bold' : 'normal'}
-                      color={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
-                      _hover={{ color: navTextActive }}
+                      color={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? navActive : navColor}
+                      _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
                     >
                       📂 Mon Espace
                     </MenuButton>
-                    <MenuList>
+                    <MenuList
+                      bg="ui.card"
+                      border="1px solid"
+                      borderColor="ui.border"
+                      boxShadow="0 12px 30px rgba(0,0,0,0.45)"
+                    >
                       <Link to="/library">
-                        <MenuItem icon={<Text>📚</Text>}>Ma Collection</MenuItem>
+                        <MenuItem
+                          icon={<Text>📚</Text>}
+                          color="ui.text"
+                          bg="transparent"
+                          _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}
+                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                        >
+                          Ma Collection
+                        </MenuItem>
                       </Link>
                       <Link to="/collaborative-lists">
-                        <MenuItem icon={<Text>👥</Text>}>Listes Partagées</MenuItem>
+                        <MenuItem
+                          icon={<Text>👥</Text>}
+                          color="ui.text"
+                          bg="transparent"
+                          _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}
+                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                        >
+                          Listes Partagées
+                        </MenuItem>
                       </Link>
                       <Link to="/reviews">
-                        <MenuItem icon={<Text>✍️</Text>}>Mes Critiques</MenuItem>
+                        <MenuItem
+                          icon={<Text>✍️</Text>}
+                          color="ui.text"
+                          bg="transparent"
+                          _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}
+                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                        >
+                          Mes Critiques
+                        </MenuItem>
                       </Link>
                       <Link to="/feed">
-                        <MenuItem icon={<Text>📰</Text>}>Mon Feed</MenuItem>
+                        <MenuItem
+                          icon={<Text>📰</Text>}
+                          color="ui.text"
+                          bg="transparent"
+                          _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}
+                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                        >
+                          Mon Feed
+                        </MenuItem>
                       </Link>
                     </MenuList>
                   </Menu>
@@ -117,10 +160,21 @@ export const Header = () => {
                     <Button 
                       variant="ghost"
                       fontWeight={isActive('/discover') ? 'bold' : 'normal'}
-                      color={isActive('/discover') ? navTextActive : navText}
-                      _hover={{ color: navTextActive }}
+                      color={isActive('/discover') ? navActive : navColor}
+                      _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
                     >
                       🔍 Découvrir
+                    </Button>
+                  </Link>
+
+                  <Link to="/rooms">
+                    <Button
+                      variant="ghost"
+                      fontWeight={isActive('/rooms') ? 'bold' : 'normal'}
+                      color={isActive('/rooms') ? navActive : navColor}
+                      _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
+                    >
+                      👥 Salons
                     </Button>
                   </Link>
                   
@@ -129,8 +183,8 @@ export const Header = () => {
                       <Button 
                         variant="ghost"
                         fontWeight={isActive('/messages') ? 'bold' : 'normal'}
-                        color={isActive('/messages') ? navTextActive : navText}
-                        _hover={{ color: navTextActive }}
+                        color={isActive('/messages') ? navActive : navColor}
+                        _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
                       >
                         💬 Messages
                       </Button>
@@ -160,13 +214,6 @@ export const Header = () => {
           </HStack>
 
           <HStack spacing={3}>
-            <IconButton
-              aria-label={colorMode === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
-              icon={colorMode === 'dark' ? <SunIcon /> : <MoonIcon />}
-              variant="ghost"
-              onClick={toggleColorMode}
-            />
-
             {isAuthenticated ? (
               <>
                 <NotificationBell />
@@ -175,6 +222,8 @@ export const Header = () => {
                   aria-label="Settings"
                   icon={<SettingsIcon />}
                   variant="ghost"
+                  color={navColor}
+                  _hover={{ bg: 'rgba(124,58,237,0.15)', color: navActive }}
                   onClick={() => navigate('/settings')}
                 />
                 
@@ -192,22 +241,40 @@ export const Header = () => {
                       </Text>
                     </HStack>
                   </MenuButton>
-                  <MenuList>
+                  <MenuList
+                    bg="ui.card"
+                    border="1px solid"
+                    borderColor="ui.border"
+                    boxShadow="0 12px 30px rgba(0,0,0,0.45)"
+                  >
                     <Link to="/profile">
-                      <MenuItem>👤 {t('profile')}</MenuItem>
+                      <MenuItem
+                        color="ui.text"
+                        _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#ddd6fe' }}
+                        _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                      >
+                        👤 {t('profile')}
+                      </MenuItem>
                     </Link>
-                    <MenuDivider />
-                    <MenuItem onClick={handleLogout} color="red.500">🚪 {t('logout')}</MenuItem>
+                    <MenuDivider borderColor="ui.border" />
+                    <MenuItem
+                      onClick={handleLogout}
+                      color="#fca5a5"
+                      _hover={{ bg: 'rgba(239,68,68,0.14)', color: '#f87171' }}
+                      _focus={{ bg: 'rgba(239,68,68,0.18)', color: '#f87171' }}
+                    >
+                      🚪 {t('logout')}
+                    </MenuItem>
                   </MenuList>
                 </Menu>
               </>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="ghost" color="gray.700">Connexion</Button>
+                  <Button variant="ghost" color="#a78bfa" _hover={{ bg: 'rgba(124,58,237,0.15)' }}>Connexion</Button>
                 </Link>
                 <Link to="/register">
-                  <Button colorScheme="blue" borderRadius="full" px={6}>S'inscrire</Button>
+                  <Button bg="#7c3aed" color="white" px={6} _hover={{ bg: '#6d28d9' }}>S'inscrire</Button>
                 </Link>
               </>
             )}
