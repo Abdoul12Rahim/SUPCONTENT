@@ -35,7 +35,7 @@ export const globalSearch = async (req: Request, res: Response) => {
         ],
       })
         .populate('user', 'username avatar')
-        .select('name description isPublic items user updatedAt')
+        .select('name description isPublic user updatedAt')
         .sort({ updatedAt: -1 })
         .limit(pageSize),
       CollaborativeList.find({

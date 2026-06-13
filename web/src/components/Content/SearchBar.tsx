@@ -1,4 +1,4 @@
-import { Input, InputGroup, InputLeftElement, Icon } from '@chakra-ui/react';
+import { Input, InputGroup, InputLeftElement, Icon, useColorModeValue } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 
@@ -9,10 +9,10 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = 'Rechercher un jeu...' }: SearchBarProps) => {
   const [query, setQuery] = useState('');
-  const inputBg = 'ui.card';
-  const inputText = 'ui.text';
-  const inputBorder = 'ui.border';
-  const placeholderColor = 'ui.mutetext';
+  const inputBg = useColorModeValue('white', 'gray.800');
+  const inputText = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const inputBorder = useColorModeValue('gray.200', 'gray.700');
+  const placeholderColor = useColorModeValue('gray.500', 'gray.400');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

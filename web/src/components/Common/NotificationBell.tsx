@@ -47,17 +47,17 @@ export const NotificationBell = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const menuBg = 'ui.card';
-  const menuBorder = 'ui.border';
-  const headerText = 'ui.text';
-  const mutedText = 'ui.mutetext';
-  const unreadBg = 'rgba(124,58,237,0.12)';
-  const unreadHoverBg = 'rgba(124,58,237,0.2)';
-  const readBg = 'ui.card';
-  const readHoverBg = 'ui.cardElevated';
-  const dividerColor = 'ui.border';
-  const avatarNameColor = '#a78bfa';
-  const messageTextColor = 'ui.mutetext';
+  const menuBg = useColorModeValue('white', 'gray.800');
+  const menuBorder = useColorModeValue('gray.200', 'gray.700');
+  const headerText = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const mutedText = useColorModeValue('gray.500', 'gray.400');
+  const unreadBg = useColorModeValue('blue.50', 'blue.900');
+  const unreadHoverBg = useColorModeValue('blue.100', 'blue.800');
+  const readBg = useColorModeValue('white', 'gray.800');
+  const readHoverBg = useColorModeValue('gray.50', 'gray.700');
+  const dividerColor = useColorModeValue('gray.200', 'gray.700');
+  const avatarNameColor = useColorModeValue('blue.600', 'blue.300');
+  const messageTextColor = useColorModeValue('gray.600', 'gray.300');
 
   useEffect(() => {
     if (isOpen && isAuthenticated) {

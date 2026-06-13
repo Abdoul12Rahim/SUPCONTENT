@@ -13,8 +13,10 @@ import {
   MenuDivider,
   Icon,
   IconButton,
+  useColorMode,
+  useColorModeValue, // Ajouté pour contrôler le thème de l'application
 } from '@chakra-ui/react';
-import { SearchIcon, BellIcon, SettingsIcon } from '@chakra-ui/icons';
+import { SearchIcon, BellIcon, SettingsIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -29,6 +31,12 @@ export const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { unreadCount } = useUnreadMessages();
+  const { colorMode, toggleColorMode } = useColorMode(); // Hook Chakra UI pour le thème
+  const headerBg = useColorModeValue('white', 'gray.800');
+  const headerBorder = useColorModeValue('gray.100', 'gray.700');
+  const primaryText = useColorModeValue('gray.800', 'whiteAlpha.900');
+  const navText = useColorModeValue('gray.600', 'gray.300');
+  const navTextActive = useColorModeValue('gray.900', 'white');
 
   const handleLogout = () => {
     logout();
@@ -46,7 +54,7 @@ export const Header = () => {
 
   return (
     <Box
-      bg="rgba(13,13,20,0.95)"
+      bg={headerBg}
       backdropFilter="saturate(140%) blur(8px)"
       px={4}
       shadow="sm"
@@ -54,7 +62,7 @@ export const Header = () => {
       top={0}
       zIndex={10}
       borderBottom="1px"
-      borderColor="rgba(124,58,237,0.25)"
+      borderColor={headerBorder}
     >
       <Container maxW="container.xl">
         <Flex h={16} alignItems="center" justifyContent="space-between">
@@ -62,7 +70,7 @@ export const Header = () => {
             <Link to="/">
               <HStack spacing={2}>
                 <Text fontSize="3xl">🎮</Text>
-                <Text fontSize="xl" fontWeight="bold" color="#a78bfa">
+                <Text fontSize="xl" fontWeight="bold" color={primaryText}>
                   SUPCONTENT
                 </Text>
               </HStack>
@@ -73,8 +81,8 @@ export const Header = () => {
                 <Button 
                   variant="ghost"
                   fontWeight={isActive('/') ? 'bold' : 'normal'}
-                  color={isActive('/') ? navActive : navColor}
-                  _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
+                  color={isActive('/') ? navTextActive : navText}
+                  _hover={{ color: navTextActive }}
                 >
                   🏠 Accueil
                 </Button>
@@ -83,8 +91,8 @@ export const Header = () => {
                 <Button 
                   variant="ghost"
                   fontWeight={isActive('/games') ? 'bold' : 'normal'}
-                  color={isActive('/games') ? navActive : navColor}
-                  _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
+                  color={isActive('/games') ? navTextActive : navText}
+                  _hover={{ color: navTextActive }}
                   leftIcon={<SearchIcon />}
                 >
                   Recherche
@@ -98,8 +106,8 @@ export const Header = () => {
                       as={Button}
                       variant="ghost"
                       fontWeight={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? 'bold' : 'normal'}
-                      color={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? navActive : navColor}
-                      _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
+                      color={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
+                      _hover={{ color: navTextActive }}
                     >
                       📂 Mon Espace
                     </MenuButton>
@@ -214,6 +222,16 @@ export const Header = () => {
           </HStack>
 
           <HStack spacing={3}>
+            {/* BOUTON SOMBRE/CLAIR UNIQUE (Placé ici pour s'adapter à la fois aux invités et aux connectés) */}
+            <IconButton
+              aria-label="Toggle Theme"
+              icon={<Text fontSize="lg">{colorMode === 'light' ? <MoonIcon /> : <SunIcon />}</Text>}
+              variant="ghost"
+              color={navColor}
+              _hover={{ bg: 'rgba(124,58,237,0.15)', color: navActive }}
+              onClick={toggleColorMode}
+            />
+
             {isAuthenticated ? (
               <>
                 <NotificationBell />

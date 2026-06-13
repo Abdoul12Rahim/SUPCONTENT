@@ -1,4 +1,4 @@
-import { Box, Image, Text, Badge, HStack, VStack, Icon } from '@chakra-ui/react';
+import { Box, Image, Text, Badge, HStack, VStack, Icon,  useColorModeValue  } from '@chakra-ui/react';
 import { StarIcon } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
@@ -16,8 +16,8 @@ interface GameCardProps {
 
 export const GameCard = ({ id, title, slug, image, rating, releaseDate, genres, platforms }: GameCardProps) => {
   const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
-  const cardBg = 'ui.card';
-  const releaseText = 'ui.mutetext';
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const releaseText = useColorModeValue('gray.500', 'gray.400');
   const [imgError, setImgError] = useState(false);
   const fallbackImage = 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=800&q=80';
   const imageSrc = !imgError && image ? image : fallbackImage;
