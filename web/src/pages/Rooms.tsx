@@ -5,26 +5,15 @@ import {
   ModalBody, ModalFooter, ModalCloseButton,
   Textarea, Switch, FormControl, FormLabel,
   useDisclosure, useToast, Divider, Tooltip,
-  SimpleGrid, Container,
+  SimpleGrid, Container, 
+  useColorMode,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { SearchIcon, AddIcon, LockIcon, UnlockIcon } from '@chakra-ui/icons';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-// ─── Palette identique au mobile ───────────────────────────────────────────
-const C = {
-  primary: '#7c3aed',
-  primaryLight: 'rgba(124,58,237,0.15)',
-  primaryBorder: 'rgba(124,58,237,0.25)',
-  bgDark: '#0d0d14',
-  surface: '#13131f',
-  surfaceElevated: '#1a1a2e',
-  border: 'rgba(255,255,255,0.06)',
-  textLight: '#f1f5f9',
-  textMuted: '#64748b',
-  accentGreen: '#10b981',
-  danger: '#ef4444',
-};
+
 
 // ─── Données de démo (identiques au mobile) ───────────────────────────────
 const GAME_OPTIONS = [
@@ -86,6 +75,27 @@ type Room = typeof INITIAL_ROOMS[0];
 type Message = { id: string; senderId: string; senderName: string; avatar: string; content: string; time: string };
 
 export const Rooms = () => {
+  // ─── Palette identique au mobile ───────────────────────────────────────────
+  const surface         = useColorModeValue('#ffffff',               '#13131f');
+  const surfaceElevated = useColorModeValue('#f0eeff',               '#1a1a2e');
+  const bgDark          = useColorModeValue('#f8f7ff',               '#0d0d14');
+  const border          = useColorModeValue('rgba(124,58,237,0.12)', 'rgba(255,255,255,0.06)');
+  const textLight       = useColorModeValue('#1a1a2e',               '#f1f5f9');
+  const textMuted       = useColorModeValue('#6b7280',               '#64748b');
+
+  const C = {
+    primary:       '#7c3aed',
+    primaryLight:  'rgba(124,58,237,0.15)',
+    primaryBorder: 'rgba(124,58,237,0.25)',
+    accentGreen:   '#10b981',
+    danger:        '#ef4444',
+    bgDark,
+    surface,
+    surfaceElevated,
+    border,
+    textLight,
+    textMuted,
+  };
   const { user, isAuthenticated } = useAuth();
   const toast = useToast();
   const [rooms, setRooms] = useState(INITIAL_ROOMS);
