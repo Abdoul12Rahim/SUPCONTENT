@@ -77,8 +77,12 @@ export const Home = () => {
     const border          = useColorModeValue('rgba(124,58,237,0.12)', 'rgba(255,255,255,0.06)');
     const textLight       = useColorModeValue('#1a1a2e',               '#f1f5f9');
     const textMuted       = useColorModeValue('#6b7280',               '#64748b');
-  
+    const eventGradient = useColorModeValue(
+      'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 60%)',
+      'linear-gradient(to top, rgba(13,13,20,0.92) 0%, transparent 60%)'
+    );
     const C = {
+      
       primary:       '#7c3aed',
       primaryLight:  'rgba(124,58,237,0.15)',
       primaryBorder: 'rgba(124,58,237,0.25)',
@@ -213,7 +217,7 @@ export const Home = () => {
                 />
                 <Box
                   position="absolute" inset={0}
-                  bg="linear-gradient(to top, rgba(13,13,20,0.92) 0%, transparent 60%)"
+                  bg={eventGradient}
                 />
                 <Box position="absolute" bottom={4} left={4} right={4}>
                   <Badge
@@ -222,7 +226,7 @@ export const Home = () => {
                   >
                     {activeEvent?.category}
                   </Badge>
-                  <Text fontWeight="bold" color={C.textLight} fontSize={{ base: 'sm', md: 'lg' }} noOfLines={2}>
+                  <Text fontWeight="bold" color="white" fontSize={{ base: 'sm', md: 'lg' }} noOfLines={2}>
                     {activeEvent?.title}
                   </Text>
                   <Badge bg="rgba(239,68,68,0.2)" color="#f87171" borderRadius="full" fontSize="xs" mt={1}>
