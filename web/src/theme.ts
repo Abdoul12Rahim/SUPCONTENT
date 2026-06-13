@@ -20,34 +20,78 @@ const theme = extendTheme({
       800: '#4c1d95',
       900: '#3b1578',
     },
-    ui: {
-      bg: '#0d0d14',
-      card: '#13131f',
-      cardElevated: '#1a1a2e',
-      text: '#f1f5f9',
-      mutetext: '#64748b',
-      border: 'rgba(255,255,255,0.06)',
-      borderBrand: 'rgba(124,58,237,0.25)',
-      success: '#10b981',
-      error: '#ef4444',
-      warning: '#f59e0b',
-      accentBlue: '#06b6d4',
-      accentGreen: '#10b981',
-    },
   },
   styles: {
-    global: {
+    global: (props: { colorMode: string }) => ({
       body: {
-        bg: '#0d0d14',
-        color: '#f1f5f9',
+        bg: props.colorMode === 'dark' ? '#0d0d14' : '#f8f7ff',
+        color: props.colorMode === 'dark' ? '#f1f5f9' : '#1a1a2e',
+        transition: 'background 0.2s ease, color 0.2s ease',
       },
       '#root': {
         minHeight: '100vh',
-        background: '#0d0d14',
+        background: props.colorMode === 'dark' ? '#0d0d14' : '#f8f7ff',
       },
       '::-webkit-scrollbar': { width: '6px' },
-      '::-webkit-scrollbar-track': { background: '#13131f' },
-      '::-webkit-scrollbar-thumb': { background: 'rgba(124,58,237,0.5)', borderRadius: '3px' },
+      '::-webkit-scrollbar-track': {
+        background: props.colorMode === 'dark' ? '#13131f' : '#e9e6f8',
+      },
+      '::-webkit-scrollbar-thumb': {
+        background: 'rgba(124,58,237,0.5)',
+        borderRadius: '3px',
+      },
+    }),
+  },
+  semanticTokens: {
+    colors: {
+      'ui.bg': {
+        default: '#f8f7ff',
+        _dark: '#0d0d14',
+      },
+      'ui.card': {
+        default: '#ffffff',
+        _dark: '#13131f',
+      },
+      'ui.cardElevated': {
+        default: '#f0eeff',
+        _dark: '#1a1a2e',
+      },
+      'ui.text': {
+        default: '#1a1a2e',
+        _dark: '#f1f5f9',
+      },
+      'ui.mutetext': {
+        default: '#6b7280',
+        _dark: '#64748b',
+      },
+      'ui.border': {
+        default: 'rgba(124,58,237,0.15)',
+        _dark: 'rgba(255,255,255,0.06)',
+      },
+      'ui.borderBrand': {
+        default: 'rgba(124,58,237,0.3)',
+        _dark: 'rgba(124,58,237,0.25)',
+      },
+      'ui.success': {
+        default: '#059669',
+        _dark: '#10b981',
+      },
+      'ui.error': {
+        default: '#dc2626',
+        _dark: '#ef4444',
+      },
+      'ui.warning': {
+        default: '#d97706',
+        _dark: '#f59e0b',
+      },
+      'ui.accentBlue': {
+        default: '#0891b2',
+        _dark: '#06b6d4',
+      },
+      'ui.accentGreen': {
+        default: '#059669',
+        _dark: '#10b981',
+      },
     },
   },
   components: {
@@ -60,20 +104,23 @@ const theme = extendTheme({
         colorScheme: 'brand',
       },
       variants: {
-        solid: {
+        solid: (props: { colorMode: string }) => ({
           bg: '#7c3aed',
           color: 'white',
           _hover: { bg: '#6d28d9' },
-        },
-        ghost: {
-          color: '#f1f5f9',
-          _hover: { bg: 'rgba(124,58,237,0.15)', color: '#a78bfa' },
-        },
-        outline: {
+        }),
+        ghost: (props: { colorMode: string }) => ({
+          color: props.colorMode === 'dark' ? '#f1f5f9' : '#1a1a2e',
+          _hover: {
+            bg: 'rgba(124,58,237,0.15)',
+            color: '#a78bfa',
+          },
+        }),
+        outline: (props: { colorMode: string }) => ({
           borderColor: 'rgba(124,58,237,0.4)',
           color: '#a78bfa',
           _hover: { bg: 'rgba(124,58,237,0.1)' },
-        },
+        }),
       },
     },
     Card: {
@@ -109,7 +156,11 @@ const theme = extendTheme({
       baseStyle: {
         tab: {
           color: 'ui.mutetext',
-          _selected: { color: 'ui.text', bg: 'ui.card', borderColor: 'ui.border' },
+          _selected: {
+            color: 'ui.text',
+            bg: 'ui.card',
+            borderColor: 'ui.border',
+          },
         },
         tablist: {
           bg: 'ui.cardElevated',

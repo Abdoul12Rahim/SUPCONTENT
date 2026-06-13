@@ -120,10 +120,10 @@ export const Header = () => {
                       <Link to="/library">
                         <MenuItem
                           icon={<Text>📚</Text>}
-                          color="ui.text"
+                          color={(isActive('/library') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
                           bg="transparent"
-                          _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}
-                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                          _hover={{ color: navTextActive }}
+                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: navTextActive }}
                         >
                           Ma Collection
                         </MenuItem>
@@ -131,10 +131,10 @@ export const Header = () => {
                       <Link to="/collaborative-lists">
                         <MenuItem
                           icon={<Text>👥</Text>}
-                          color="ui.text"
+                          color={(isActive('/collaborative-lists')) ? navTextActive : navText}
                           bg="transparent"
-                          _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}
-                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                          _hover={{ color: navTextActive }}
+                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: navTextActive }}
                         >
                           Listes Partagées
                         </MenuItem>
@@ -142,10 +142,10 @@ export const Header = () => {
                       <Link to="/reviews">
                         <MenuItem
                           icon={<Text>✍️</Text>}
-                          color="ui.text"
+                          color={(isActive('/reviews') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
                           bg="transparent"
-                          _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}
-                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                          _hover={{ color: navTextActive }}
+                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: navTextActive }}
                         >
                           Mes Critiques
                         </MenuItem>
@@ -153,10 +153,10 @@ export const Header = () => {
                       <Link to="/feed">
                         <MenuItem
                           icon={<Text>📰</Text>}
-                          color="ui.text"
+                          color={(isActive('/feed') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
                           bg="transparent"
-                          _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#c4b5fd' }}
-                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
+                          _hover={{ color: navTextActive }}
+                          _focus={{ bg: 'rgba(124,58,237,0.18)', color: navTextActive }}
                         >
                           Mon Feed
                         </MenuItem>
@@ -168,8 +168,8 @@ export const Header = () => {
                     <Button 
                       variant="ghost"
                       fontWeight={isActive('/discover') ? 'bold' : 'normal'}
-                      color={isActive('/discover') ? navActive : navColor}
-                      _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
+                      color={(isActive('/discover') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
+                      _hover={{ color: navTextActive }}
                     >
                       🔍 Découvrir
                     </Button>
@@ -179,8 +179,8 @@ export const Header = () => {
                     <Button
                       variant="ghost"
                       fontWeight={isActive('/rooms') ? 'bold' : 'normal'}
-                      color={isActive('/rooms') ? navActive : navColor}
-                      _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
+                      color={(isActive('/rooms') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
+                      _hover={{ color: navTextActive }}
                     >
                       👥 Salons
                     </Button>
@@ -191,8 +191,8 @@ export const Header = () => {
                       <Button 
                         variant="ghost"
                         fontWeight={isActive('/messages') ? 'bold' : 'normal'}
-                        color={isActive('/messages') ? navActive : navColor}
-                        _hover={{ color: navActive, bg: 'rgba(124,58,237,0.15)' }}
+                        color={(isActive('/messages') || isActive('/reviews') || isActive('/feed')) ? navTextActive : navText}
+                        _hover={{ color: navTextActive }}
                       >
                         💬 Messages
                       </Button>
@@ -224,11 +224,9 @@ export const Header = () => {
           <HStack spacing={3}>
             {/* BOUTON SOMBRE/CLAIR UNIQUE (Placé ici pour s'adapter à la fois aux invités et aux connectés) */}
             <IconButton
-              aria-label="Toggle Theme"
-              icon={<Text fontSize="lg">{colorMode === 'light' ? <MoonIcon /> : <SunIcon />}</Text>}
+              aria-label={colorMode === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+              icon={colorMode === 'dark' ? <SunIcon /> : <MoonIcon />}
               variant="ghost"
-              color={navColor}
-              _hover={{ bg: 'rgba(124,58,237,0.15)', color: navActive }}
               onClick={toggleColorMode}
             />
 
@@ -259,28 +257,14 @@ export const Header = () => {
                       </Text>
                     </HStack>
                   </MenuButton>
-                  <MenuList
-                    bg="ui.card"
-                    border="1px solid"
-                    borderColor="ui.border"
-                    boxShadow="0 12px 30px rgba(0,0,0,0.45)"
-                  >
+                  <MenuList >
                     <Link to="/profile">
-                      <MenuItem
-                        color="ui.text"
-                        _hover={{ bg: 'rgba(124,58,237,0.15)', color: '#ddd6fe' }}
-                        _focus={{ bg: 'rgba(124,58,237,0.18)', color: '#ddd6fe' }}
-                      >
+                      <MenuItem  color= {navTextActive} _hover={{ color: navTextActive }}>
                         👤 {t('profile')}
                       </MenuItem>
                     </Link>
-                    <MenuDivider borderColor="ui.border" />
-                    <MenuItem
-                      onClick={handleLogout}
-                      color="#fca5a5"
-                      _hover={{ bg: 'rgba(239,68,68,0.14)', color: '#f87171' }}
-                      _focus={{ bg: 'rgba(239,68,68,0.18)', color: '#f87171' }}
-                    >
+                    <MenuDivider/>
+                    <MenuItem  color= {navTextActive} _hover={{ color: navTextActive }}>
                       🚪 {t('logout')}
                     </MenuItem>
                   </MenuList>

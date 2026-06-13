@@ -29,6 +29,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
         withCredentials: true,
         transports: ['websocket', 'polling'],
+        reconnection: false,      // ← stop les reconnexions en boucle
+        timeout: 5000, 
       });
 
       newSocket.on('connect', () => {
@@ -44,8 +46,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       });
 
       newSocket.on('connect_error', (error) => {
-        console.error('Erreur de connexion Socket:', error);
+        console.warn('Socket indisponible:', error.message);
         setIsConnected(false);
+        newSocket.disconnect(); // ← stop toute nouvelle tentative
       });
 
       setSocket(newSocket);

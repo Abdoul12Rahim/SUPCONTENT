@@ -9,10 +9,10 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = 'Rechercher un jeu...' }: SearchBarProps) => {
   const [query, setQuery] = useState('');
-  const inputBg = useColorModeValue('white', 'gray.800');
-  const inputText = useColorModeValue('gray.800', 'whiteAlpha.900');
-  const inputBorder = useColorModeValue('gray.200', 'gray.700');
-  const placeholderColor = useColorModeValue('gray.500', 'gray.400');
+  const inputBg = useColorModeValue('white', '#13131f');
+  const inputText = useColorModeValue('gray.800', '#f1f5f9');
+  const inputBorder = useColorModeValue('gray.200', 'rgba(255,255,255,0.06)');
+  const placeholderColor = useColorModeValue('gray.400', '#64748b');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

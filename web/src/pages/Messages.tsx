@@ -17,6 +17,7 @@ import {
   InputGroup,
   InputLeftElement,
   Tooltip,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { ArrowBackIcon, DeleteIcon, CloseIcon, SearchIcon } from '@chakra-ui/icons';
 import { useState, useEffect, useRef, useMemo } from 'react';
@@ -114,18 +115,19 @@ export const Messages = () => {
   const discardRecordingRef = useRef(false);
   const recorderMimeTypeRef = useRef<string>('audio/webm');
 
-  const C = {
-    bg: '#0d0d14',
-    panel: '#13131f',
-    panelElevated: '#1a1a2e',
-    border: 'rgba(255,255,255,0.08)',
-    text: '#f1f5f9',
-    muted: '#94a3b8',
-    primary: '#7c3aed',
-    primarySoft: 'rgba(124,58,237,0.15)',
-    primaryBorder: 'rgba(124,58,237,0.35)',
-  };
+  // APRÈS — à mettre à la place, dans le composant
+const bg            = useColorModeValue('#f8f7ff',               '#0d0d14');
+const panel         = useColorModeValue('#ffffff',               '#13131f');
+const panelElevated = useColorModeValue('#f0eeff',               '#1a1a2e');
+const border        = useColorModeValue('rgba(124,58,237,0.12)', 'rgba(255,255,255,0.08)');
+const text          = useColorModeValue('#1a1a2e',               '#f1f5f9');
+const muted         = useColorModeValue('#6b7280',               '#94a3b8');
+const primary       = '#7c3aed';
+const primarySoft   = 'rgba(124,58,237,0.15)';
+const primaryBorder = 'rgba(124,58,237,0.35)';
 
+  const C = { bg, panel, panelElevated, border, text, muted, primary, primarySoft, primaryBorder };
+  
   const getMediaUrl = (url?: string) => {
     if (!url) return '';
     if (/^https?:\/\//i.test(url)) return url;

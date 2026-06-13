@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { useColorMode } from '@chakra-ui/react';
 
 interface ThemeContextType {
@@ -18,28 +18,9 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const [isDark, setIsDark] = useState(colorMode === 'dark');
-
-  useEffect(() => {
-    setIsDark(colorMode === 'dark');
-  }, [colorMode]);
-
-  // Keep the whole app in dark mode to preserve contrast with the new dark palette.
-  useEffect(() => {
-    if (colorMode !== 'dark') {
-      toggleColorMode();
-    }
-  }, [colorMode, toggleColorMode]);
-
-  const toggleTheme = () => {
-    // Dark-only theme: ignore toggles that would bring low-contrast light surfaces back.
-    if (colorMode !== 'dark') {
-      toggleColorMode();
-    }
-  };
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark: colorMode === 'dark', toggleTheme: toggleColorMode }}>
       {children}
     </ThemeContext.Provider>
   );
