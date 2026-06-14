@@ -27,14 +27,10 @@ api.interceptors.request.use(
 // ── AUTH ──────────────────────────────────────
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
-  // data = { username, email, password }
   login: (data) => api.post('/auth/login', data),
-  // data = { email, password }
   getMe: () => api.get('/auth/me'),
   updateProfile: (data) => api.put('/auth/profile', data),
-  // data = { displayName, bio, website, avatar, theme, language, emailNotifications, pushNotifications }
   changePassword: (data) => api.put('/auth/change-password', data),
-  // data = { currentPassword, newPassword }
 };
 
 // ── CONTENT (RAWG via backend) ─────────────────
@@ -53,7 +49,6 @@ export const contentAPI = {
 export const libraryAPI = {
   getMyLibrary: () => api.get('/library/my'),
   addGame: (data) => api.post('/library', data),
-  // data = { contentId, status } — status: 'playing'|'completed'|'wishlist'|'dropped'
   checkInLibrary: (contentId) => api.get(`/library/check/${contentId}`),
   removeGame: (contentId) => api.delete(`/library/${contentId}`),
 };
@@ -66,10 +61,8 @@ export const reviewAPI = {
   getRecent: () => api.get('/reviews/recent'),
   getById: (reviewId) => api.get(`/reviews/${reviewId}`),
   create: (data) => api.post('/reviews', data),
-  // data = { contentId, rating, text }
   like: (reviewId) => api.post(`/reviews/${reviewId}/like`),
   addComment: (reviewId, data) => api.post(`/reviews/${reviewId}/comment`, data),
-  // data = { text }
   getComments: (reviewId) => api.get(`/reviews/${reviewId}/comments`),
   updateComment: (commentId, data) => api.put(`/reviews/comment/${commentId}`, data),
   deleteComment: (commentId) => api.delete(`/reviews/comment/${commentId}`),
@@ -100,13 +93,21 @@ export const socialAPI = {
       return await api.get('/content/upcoming');
     }
   },
-  // Follow
+  
+  // --- FOLLOW (Corrigé pour correspondre au backend) ---
   followUser: (userId) => api.post(`/social/follow/${userId}`),
-  unfollowUser: (userId) => api.delete(`/social/follow/${userId}`),
-  getFollowers: (userId) => api.get(`/social/followers/${userId}`),
-  getFollowing: (userId) => api.get(`/social/following/${userId}`),
+  unfollowUser: (userId) => api.post(`/social/unfollow/${userId}`),  
+  getFollowers: (userId) => api.get(`/social/${userId}/followers`),
+  getFollowing: (userId) => api.get(`/social/${userId}/following`), 
+  checkFollowStatus: (userId) => api.get(`/social/follow-status/${userId}`),
+  checkIfFollowsMe: (userId) => api.get(`/social/follows-me/${userId}`),
   searchUsers: (query) => api.get(`/social/search?q=${query}`),
   getFeed: () => api.get('/social/feed'),
+
+  getActiveRooms: () => api.get('/rooms/active'),
+  createRoom: (roomData) => api.post('/rooms', roomData),
+  joinRoom: (roomId) => api.post(`/rooms/${roomId}/join`),
+  leaveRoom: (roomId) => api.post(`/rooms/${roomId}/leave`),
 };
 
 // ── MESSAGES ──────────────────────────────────

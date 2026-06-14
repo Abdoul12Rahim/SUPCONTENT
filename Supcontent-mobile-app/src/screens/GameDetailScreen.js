@@ -117,9 +117,16 @@ export default function GameDetailScreen({ route, navigation }) {
             listAPI.getMyLists(),
           ]);
 
-          if (libCheck.status === 'fulfilled') {
-            setInLibrary(true);
-            setLibraryStatus(libCheck.value.data?.status || 'playing');
+if (libCheck.status === 'fulfilled' && libCheck.value.data) {
+            const data = libCheck.value.data;
+
+            if (data.inLibrary || data.status) {
+              setInLibrary(true);
+              setLibraryStatus(data.status || 'playing');
+            } else {
+              setInLibrary(false);
+              setLibraryStatus(null);
+            }
           }
           if (myReviewRes.status === 'fulfilled' && myReviewRes.value.data) {
             setMyReview(myReviewRes.value.data);
@@ -246,7 +253,7 @@ const handleSubmitReview = async () => {
 };
 
   const getStatusLabel = (status) => {
-    const map = { playing: ' En cours', completed: ' Terminé', wishlist: ' Wishlist', dropped: ' Abandonné' };
+    const map = { playing: ' En cours', completed: ' Terminé', to_play: ' Wishlist', dropped: ' Abandonné' };
     return map[status] || status;
   };
 
@@ -510,7 +517,7 @@ const handleSubmitReview = async () => {
             {[
               { status: 'playing', label: '🎮 En cours', sub: 'Je joue actuellement' },
               { status: 'completed', label: '✅ Terminé', sub: 'J\'ai fini ce jeu' },
-              { status: 'wishlist', label: '⭐ Wishlist', sub: 'Je veux y jouer' },
+              { status: 'to_play',  label: '⭐ Wishlist', sub: 'Je veux y jouer' },
               { status: 'dropped', label: '❌ Abandonné', sub: 'J\'ai arrêté' },
             ].map(({ status, label, sub }) => (
               <TouchableOpacity

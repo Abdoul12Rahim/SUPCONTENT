@@ -102,11 +102,9 @@ export default function HomeScreen({ navigation }) {
         if (Array.isArray(data) && data.length > 0) {
           setActiveRooms(data);
         }
-        
       }
 
       // [3] Événements live/upcoming
-      // Structure backend : [{ _id, title, category, status, image, url }]
       if (results[3].status === 'fulfilled') {
         const data = results[3].value.data;
         const list = data.results || data;
@@ -117,8 +115,6 @@ export default function HomeScreen({ navigation }) {
       }
 
       // [4] News/Headlines
-      // Structure backend : [{ _id, title, source, image, url, publishedAt }]
-      // ou format NewsAPI : [{ title, source: { name }, urlToImage, url, publishedAt }]
       if (results[4].status === 'fulfilled') {
         const data = results[4].value.data;
         const list = Array.isArray(data) ? data : data.articles || [];
@@ -371,7 +367,7 @@ export default function HomeScreen({ navigation }) {
         {/* ── NEW RELEASES ── */}
         <View style={{ marginTop: 32 }}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>New Releases ✨</Text>
+            <Text style={styles.sectionTitle}>New Releases </Text>
             <TouchableOpacity onPress={() => navigation.navigate('GameListScreen', {
               type: 'newreleases', title: 'Nouveautés',
             })}>
