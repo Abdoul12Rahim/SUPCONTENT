@@ -93,16 +93,22 @@ export default function ProfileScreen({ navigation, route }) {
     setIsLoading(true);
     try {
       const userId = route.params?.userId;
-      if (isMyProfile) {
+      
+   if (isMyProfile) {
+        // --- 1. TON PROFIL ---
         const results = await Promise.allSettled([
           libraryAPI.getMyLibrary(),
           listAPI.getMyLists(),
           reviewAPI.getByUser(user._id),
+          userAPI.getProfile(user._id), 
+          userAPI.getStats(user._id), 
         ]);
 
         const libRes = results[0];
         const listRes = results[1];
         const reviewRes = results[2];
+        const profileRes = results[3]; 
+        const statsRes = results[4]; 
 
         if (libRes.status === 'fulfilled') {
           const raw = libRes.value.data;
@@ -122,16 +128,28 @@ export default function ProfileScreen({ navigation, route }) {
           setReviews(list);
         } else { setReviews([]); }
 
+        if (profileRes.status === 'fulfilled') {
+          const raw = profileRes.value.data;
+          setProfileUser(raw?.user || raw); 
+        }
+
+        //  ON INJECTE TES STATISTIQUES DANS L'ÉTAT (Abos, Followers, etc.)
+        if (statsRes.status === 'fulfilled') {
+          setStats(statsRes.value.data);
+        }
       } else {
+        // --- 2. LE PROFIL DES AUTRES ---
         const results = await Promise.allSettled([
           userAPI.getProfile(userId),
           userAPI.getStats(userId),
           reviewAPI.getByUser(userId),
+          socialAPI.checkFollowStatus(userId) 
         ]);
 
         const profileRes = results[0];
         const statsRes = results[1];
         const reviewRes = results[2];
+        const followRes = results[3]; 
 
         if (profileRes.status === 'fulfilled') {
           const raw = profileRes.value.data;
@@ -143,6 +161,11 @@ export default function ProfileScreen({ navigation, route }) {
           const list = Array.isArray(raw) ? raw : raw?.reviews || raw?.data || [];
           setReviews(list);
         } else { setReviews([]); }
+
+        //  ON SYNCHRONISE LE BOUTON AUTOMATIQUEMENT
+        if (followRes.status === 'fulfilled') {
+          setIsFollowing(followRes.value.data.isFollowing);
+        }
       }
     } catch (e) {
       console.log('Erreur loadProfile:', e.message);
@@ -152,13 +175,27 @@ export default function ProfileScreen({ navigation, route }) {
     }
   };
 
-  const handleFollow = async () => {
+const handleFollow = async () => {
     const userId = route.params?.userId;
+    
+    // 1. On vérifie d'abord quel ID on essaie d'envoyer
+    console.log('ID envoyé au backend :', userId);
+
+    if (!userId) {
+      console.log(' Erreur : userId est introuvable sur cette page !');
+      return;
+    }
+
     try {
-      if (isFollowing) await socialAPI.unfollowUser(userId);
-      else await socialAPI.followUser(userId);
+      if (isFollowing) {
+        await socialAPI.unfollowUser(userId);
+      } else {
+        await socialAPI.followUser(userId);
+      }
       setIsFollowing(!isFollowing);
-    } catch (e) { console.log(e); }
+    } catch (e) { 
+      console.log(' Vraie raison du refus :', e.response?.data?.message || e.message); 
+    }
   };
 
   // ── PHOTO DE PROFIL ──
@@ -166,12 +203,12 @@ const handleChangeAvatar = async () => {
   try {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission refusée', 'Autorise l\'accès à ta galerie dans les paramètres.');
+      Alert.alert('Permission refusée', 'Autorise l\'accès à ta galerie.');
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], 
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.7,
@@ -179,42 +216,46 @@ const handleChangeAvatar = async () => {
 
     if (result.canceled || !result.assets || result.assets.length === 0) return;
 
-    const uri = result.assets[0].uri;
-
-    
-    await updateUser({ ...user, avatar: uri });
+    const asset = result.assets[0];
+    // 1. Affichage immédiat pour la fluidité
+    await updateUser({ ...user, avatar: asset.uri });
 
     try {
       const formData = new FormData();
+      const filename = asset.uri.split('/').pop() || 'avatar.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : 'image/jpeg';
+
       formData.append('avatar', {
-        uri: Platform.OS === 'android' ? uri : uri.replace('file://', ''),
-        type: 'image/jpeg',
-        name: 'avatar.jpg',
+        uri: Platform.OS === 'ios' ? asset.uri.replace('file://', '') : asset.uri,
+        name: filename,
+        type: type,
       });
 
+      // 2. Envoi du fichier sur le serveur Railway
       const res = await userAPI.uploadAvatar(formData);
 
       const BASE_URL = 'https://supcontent-production.up.railway.app';
-      const rawAvatar =
-        res.data?.avatar ||
-        res.data?.url ||
-        res.data?.user?.avatar ||
-        null;
+      const rawAvatar = res.data?.avatar || res.data?.url || res.data?.user?.avatar;
 
-      const serverAvatar = rawAvatar
-        ? rawAvatar.startsWith('http')
-          ? rawAvatar
-          : `${BASE_URL}${rawAvatar}`
-        : uri;
+      if (!rawAvatar) throw new Error("Le serveur n'a pas renvoyé l'URL");
 
+      const serverAvatar = rawAvatar.startsWith('http') ? rawAvatar : `${BASE_URL}${rawAvatar}`;
+
+      // 👇 3. LA CORRECTION EST ICI : On force MongoDB à sauvegarder la nouvelle URL
+      await authAPI.updateProfile({
+        avatar: serverAvatar
+      });
+
+      // 4. On valide définitivement dans l'application
       await updateUser({ ...user, avatar: serverAvatar });
-      Alert.alert('✅ Photo mise à jour !');
-    } catch (e) {
-      console.log('❌ Erreur upload:', e.response?.data || e.message);
-      Alert.alert('✅ Photo enregistrée localement.');
+      Alert.alert('✅ Succès', 'Photo sauvegardée dans la base de données !');
+      
+    } catch (uploadError) {
+      console.log('❌ Erreur détaillée upload:', uploadError.response?.data || uploadError.message);
+      Alert.alert('Erreur', 'La sauvegarde sur le serveur a échoué. Regarde ta console.');
     }
   } catch (e) {
-    console.log('❌ Erreur ImagePicker:', e.message);
     Alert.alert('Erreur', 'Impossible d\'ouvrir la galerie.');
   }
 };

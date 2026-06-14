@@ -6,7 +6,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 import GameListScreen from '../screens/GameListScreen';
 import NewsListScreen from '../screens/NewsListScreen';
 import BottomNav from '../components/BottomNav';
-
+import ChatScreen from '../screens/ChatScreen'; 
 // les écrans
 import HomeScreen from '../screens/HomeScreen';
 import GamesScreen from '../screens/GamesScreen';
@@ -14,6 +14,7 @@ import RoomsScreen from '../screens/RoomsScreen';
 import MessagesScreen from '../screens/MessagesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import GameDetailScreen from '../screens/GameDetailScreen'; 
+import RoomChatScreen from '../screens/RoomChatScreen';
 import LoginScreen from '../screens/LoginScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -25,7 +26,7 @@ function MainTabs() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Games" component={GamesScreen} />
       <Tab.Screen name="Rooms" component={RoomsScreen} />
-      <Tab.Screen name="Messages" component={MessagesScreen} />
+      <Tab.Screen name="Messages" component={MessagesScreen} /> 
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -42,6 +43,8 @@ export default function AppNavigator() {
         <Stack.Screen name="GameDetail" component={GameDetailScreen} />
         <Stack.Screen name="GameListScreen" component={GameListScreen} />
         <Stack.Screen name="NewsListScreen" component={NewsListScreen} />
+        <Stack.Screen name="Chat" component={ChatScreen} />
+        <Stack.Screen name="RoomChat" component={RoomChatScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
       </Stack.Navigator>
