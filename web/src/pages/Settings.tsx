@@ -29,6 +29,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
+import { getAvatarUrl } from '../utils/avatar';
 
 export const Settings = () => {
   const { isAuthenticated, user, updateUser } = useAuth();
@@ -113,6 +114,7 @@ export const Settings = () => {
         displayName,
         bio,
         avatar: avatarUrl,
+        language,
       });
       
       // Mettre à jour le contexte utilisateur
@@ -167,6 +169,16 @@ export const Settings = () => {
       return;
     }
 
+    if (currentPassword === newPassword) {
+      toast({
+        title: 'Erreur',
+        description: 'Le nouveau mot de passe doit être différent de l\'ancien',
+        status: 'error',
+        duration: 5000,
+      });
+      return;
+    }
+
     try {
       setPasswordLoading(true);
       await authAPI.changePassword({ 
@@ -193,6 +205,85 @@ export const Settings = () => {
       });
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Erreur',
+        description: 'Veuillez sélectionner une image valide',
+        status: 'error',
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: 'Erreur',
+        description: 'La taille maximale est de 5MB',
+        status: 'error',
+        duration: 4000,
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('avatar', file);
+      const response = await authAPI.uploadAvatar(formData);
+      const uploadedAvatar = response.data?.avatar;
+      if (uploadedAvatar) {
+        const avatarWithVersion = `${uploadedAvatar}${uploadedAvatar.includes('?') ? '&' : '?'}v=${Date.now()}`;
+        setAvatarUrl(avatarWithVersion);
+        updateUser({ ...user, avatar: avatarWithVersion });
+        toast({
+          title: 'Photo mise à jour',
+          description: 'Votre photo de profil a été changée',
+          status: 'success',
+          duration: 3000,
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Erreur',
+        description: error.response?.data?.message || 'Impossible de téléverser la photo',
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleLanguageChange = async (nextLanguage: 'fr' | 'en' | 'es') => {
+    try {
+      setLanguage(nextLanguage);
+      await authAPI.updateProfile({ language: nextLanguage });
+      updateUser({ ...user, language: nextLanguage } as any);
+      toast({
+        title: 'Langue mise à jour',
+        description: 'La langue de l\'interface a été modifiée',
+        status: 'success',
+        duration: 2500,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erreur',
+        description: error.response?.data?.message || 'Impossible de changer la langue',
+        status: 'error',
+        duration: 5000,
+      });
     }
   };
 
@@ -237,9 +328,18 @@ export const Settings = () => {
                       <Avatar 
                         size="xl" 
                         name={displayName || username}
-                        src={avatarUrl}
+                        src={getAvatarUrl(avatarUrl)}
                       />
-                      <Button size="sm" variant="outline">Changer la photo</Button>
+                      <Button size="sm" variant="outline" onClick={handleAvatarClick} isLoading={loading}>
+                        Changer la photo
+                      </Button>
+                      <Input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        display="none"
+                      />
                     </HStack>
 
                     <FormControl>
@@ -351,7 +451,7 @@ export const Settings = () => {
                       <FormLabel fontWeight="medium">Langue de l'interface</FormLabel>
                       <Select
                         value={language}
-                        onChange={(e) => setLanguage(e.target.value as any)}
+                        onChange={(e) => handleLanguageChange(e.target.value as 'fr' | 'en' | 'es')}
                         bg={inputBg}
                         fontWeight="medium"
                       >

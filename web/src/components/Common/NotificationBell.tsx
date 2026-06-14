@@ -205,6 +205,8 @@ export const NotificationBell = () => {
           </Box>
         }
         variant="ghost"
+        color="ui.text"
+        _hover={{ bg: 'rgba(124,58,237,0.15)' }}
         aria-label="Notifications"
       />
       <MenuList maxH="500px" overflowY="auto" w="400px" p={0} bg={menuBg} borderColor={menuBorder}>
@@ -223,7 +225,7 @@ export const NotificationBell = () => {
 
         {loading ? (
           <Box py={8} textAlign="center">
-            <Spinner size="lg" color="blue.500" />
+            <Spinner size="lg" color="brand.500" />
           </Box>
         ) : notifications.length === 0 ? (
           <Box py={8} textAlign="center">
@@ -274,7 +276,7 @@ export const NotificationBell = () => {
                       </Text>
                     </VStack>
                     {!notification.isRead && (
-                      <Box w="8px" h="8px" borderRadius="full" bg="blue.500" />
+                      <Box w="8px" h="8px" borderRadius="full" bg="brand.500" />
                     )}
                   </HStack>
                 </MenuItem>
@@ -292,7 +294,7 @@ export const NotificationBell = () => {
               <Button
                 w="full"
                 size="sm"
-                colorScheme="blue"
+                colorScheme="purple"
                 variant="ghost"
                 onClick={() => navigate('/notifications')}
                 color={headerText}

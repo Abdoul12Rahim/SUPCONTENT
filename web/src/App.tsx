@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import { Box, useColorModeValue } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -25,18 +25,18 @@ import { CollaborativeListDetail } from './pages/CollaborativeListDetail';
 import { JoinCollaborativeList } from './pages/JoinCollaborativeList';
 import { PersonalListDetail } from './pages/PersonalListDetail';
 import { ReviewDetail } from './pages/ReviewDetail';
+import { Rooms } from './pages/Rooms';
 import { AchievementListener } from './components/Common/AchievementListener';
+import { BottomNav } from './components/Layout/BottomNav';
 
 function App() {
-  const appBg = useColorModeValue('gray.50', 'gray.900');
-
   return (
     <LanguageProvider>
       <AuthProvider>
         <SocketProvider>
           <ThemeProvider>
             <AchievementListener />
-            <Box minH="100vh" bg={appBg} transition="background-color 0.2s ease">
+            <Box minH="100vh" bg="ui.bg" pb={{ base: '72px', md: 0 }}>
               <Header />
               <Routes>
               <Route path="/" element={<Home />} />
@@ -49,6 +49,7 @@ function App() {
               <Route path="/review/:reviewId" element={<ReviewDetail />} />
               <Route path="/discover" element={<Discover />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/rooms" element={<Rooms />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/collaborative-lists" element={<CollaborativeListsPage />} />
@@ -61,6 +62,7 @@ function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<Home />} />
             </Routes>
+            <BottomNav />
           </Box>
         </ThemeProvider>
         </SocketProvider>

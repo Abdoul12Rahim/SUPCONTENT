@@ -9,10 +9,10 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, placeholder = 'Rechercher un jeu...' }: SearchBarProps) => {
   const [query, setQuery] = useState('');
-  const inputBg = useColorModeValue('white', 'gray.800');
-  const inputText = useColorModeValue('gray.800', 'whiteAlpha.900');
-  const inputBorder = useColorModeValue('gray.200', 'gray.700');
-  const placeholderColor = useColorModeValue('gray.500', 'gray.400');
+  const inputBg = useColorModeValue('white', '#13131f');
+  const inputText = useColorModeValue('gray.800', '#f1f5f9');
+  const inputBorder = useColorModeValue('gray.200', 'rgba(255,255,255,0.06)');
+  const placeholderColor = useColorModeValue('gray.400', '#64748b');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -35,7 +35,7 @@ export const SearchBar = ({ onSearch, placeholder = 'Rechercher un jeu...' }: Se
         borderRadius="full"
         border="1px solid"
         _placeholder={{ color: placeholderColor }}
-        _focus={{ borderColor: 'blue.500', shadow: 'outline' }}
+        _focus={{ borderColor: 'brand.500', boxShadow: '0 0 0 1px rgba(124,58,237,0.8)' }}
       />
     </InputGroup>
   );

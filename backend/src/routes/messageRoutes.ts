@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as messageController from '../controllers/messageController';
 import { authMiddleware } from '../middleware/authMiddleware';
+import { uploadVoiceNote } from '../middleware/upload';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.delete('/conversations/:conversationId', messageController.deleteConversa
 // Routes pour les messages
 router.get('/conversations/:conversationId/messages', messageController.getMessages);
 router.post('/conversations/:conversationId/messages', messageController.sendMessage);
+router.post('/conversations/:conversationId/voice-note', uploadVoiceNote.single('audio'), messageController.sendVoiceNote);
 router.put('/conversations/:conversationId/read', messageController.markAsRead);
 router.post('/messages/:messageId/like', messageController.toggleLike);
 router.delete('/messages/:messageId', messageController.deleteMessage);

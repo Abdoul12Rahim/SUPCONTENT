@@ -54,7 +54,9 @@ interface UpdateProfileData {
   avatar?: string;
   website?: string;
   theme?: 'light' | 'dark';
-  language?: string;
+  language?: 'fr' | 'en' | 'es';
+  emailNotifications?: boolean;
+  pushNotifications?: boolean;
 }
 
 interface ChangePasswordData {
@@ -69,6 +71,10 @@ export const authAPI = {
   getMe: () => api.get('/auth/me'),
   updateProfile: (data: UpdateProfileData) => api.put('/auth/profile', data),
   changePassword: (data: ChangePasswordData) => api.put('/auth/change-password', data),
+  uploadAvatar: (formData: FormData) =>
+    api.post('/users/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 };
 
 export const contentAPI = {
@@ -212,4 +218,27 @@ export const listAPI = {
     api.post(`/lists/${listId}/items`, { contentId }),
   removeItem: (listId: string, itemId: string) => 
     api.delete(`/lists/${listId}/items/${itemId}`),
+};
+
+export const newsAPI = {
+  getHeadlines: () => api.get('/content/headlines'),
+};
+
+export const dealsAPI = {
+  getTopDeals: () =>
+    fetch('https://www.cheapshark.com/api/1.0/deals?storeID=1&upperPrice=20&sortBy=Deal Rating')
+      .then((r) => r.json()),
+};
+
+export const roomsAPI = {
+  getActive: () => api.get('/rooms/active'),
+  getEvents: async () => {
+    try {
+      const res = await api.get('/events/live');
+      if (res.data && res.data.length > 0) return res;
+      return api.get('/content/upcoming');
+    } catch {
+      return api.get('/content/upcoming');
+    }
+  },
 };

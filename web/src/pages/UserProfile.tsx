@@ -32,6 +32,7 @@ import api from '../services/api';
 import { socialAPI } from '../services/socialService';
 import { UserListModal } from '../components/Social/UserListModal';
 import { AchievementsSection } from '../components/Profile/AchievementsSection';
+import { getAvatarUrl } from '../utils/avatar';
 
 interface UserProfile {
   _id: string;
@@ -83,6 +84,16 @@ export const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
   const [modalType, setModalType] = useState<'followers' | 'following' | null>(null);
+
+  const C = {
+    card: 'ui.card',
+    elevated: 'ui.cardElevated',
+    border: 'ui.border',
+    text: 'ui.text',
+    muted: 'ui.mutetext',
+    primary: '#7c3aed',
+    primarySoft: 'rgba(124,58,237,0.15)',
+  };
 
   useEffect(() => {
     if (userId) {
@@ -245,7 +256,7 @@ export const UserProfile = () => {
     return (
       <Container maxW="container.xl" py={8}>
         <Flex justify="center" align="center" minH="400px">
-          <Spinner size="xl" color="blue.500" />
+          <Spinner size="xl" color="brand.500" />
         </Flex>
       </Container>
     );
@@ -268,35 +279,36 @@ export const UserProfile = () => {
     <Container maxW="container.xl" py={8}>
       <VStack spacing={6} align="stretch">
         {/* En-tête du profil */}
-        <Box bg="{useColorModeValue('white', 'gray.800')}" p={8} borderRadius="lg" shadow="sm">
+        <Box bg={C.card} p={8} borderRadius="lg" border="1px solid" borderColor={C.border} shadow="sm">
           <HStack spacing={6} align="start">
             <Avatar 
               size="2xl" 
               name={profile.displayName || profile.username}
-              src={profile.avatar}
+              src={getAvatarUrl(profile.avatar)}
             />
             <VStack align="start" flex={1} spacing={3}>
-              <Heading size="lg">{profile.displayName || profile.username}</Heading>
-              <Text color="gray.600">@{profile.username}</Text>
-              {profile.bio && <Text mt={2}>{profile.bio}</Text>}
+              <Heading size="lg" color={C.text}>{profile.displayName || profile.username}</Heading>
+              <Text color={C.muted}>@{profile.username}</Text>
+              {profile.bio && <Text mt={2} color={C.text}>{profile.bio}</Text>}
               <HStack spacing={2} mt={2}>
-                <Badge colorScheme="blue">Membre</Badge>
-                {profile.isAdmin && <Badge colorScheme="purple">Admin</Badge>}
+                <Badge bg={C.primarySoft} color="#c4b5fd">Membre</Badge>
+                {profile.isAdmin && <Badge bg="rgba(16,185,129,0.16)" color="#34d399">Admin</Badge>}
               </HStack>
             </VStack>
             {!isOwnProfile && (
               <HStack spacing={2}>
                 <Button
-                  colorScheme={isFollowing ? 'gray' : 'blue'}
+                  colorScheme={isFollowing ? 'gray' : 'purple'}
                   variant={isFollowing ? 'outline' : 'solid'}
                   onClick={handleFollow}
                   isLoading={followLoading}
                   size="lg"
+                  color={isFollowing ? '#cbd5e1' : 'white'}
                 >
                   {isFollowing ? 'Abonné' : (followsMe ? 'S\'abonner en retour' : 'S\'abonner')}
                 </Button>
                 <Button
-                  colorScheme="blue"
+                  colorScheme="purple"
                   variant="outline"
                   onClick={handleSendMessage}
                   size="lg"
@@ -307,7 +319,7 @@ export const UserProfile = () => {
             )}
             {isOwnProfile && (
               <Button
-                colorScheme="blue"
+                colorScheme="purple"
                 variant="outline"
                 onClick={() => navigate('/settings')}
                 size="lg"
@@ -320,62 +332,66 @@ export const UserProfile = () => {
 
         {/* Statistiques */}
         <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
-          <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+          <Box bg={C.card} p={6} borderRadius="lg" border="1px solid" borderColor={C.border} shadow="sm">
             <Stat>
-              <StatLabel>{t('gamesInLibrary')}</StatLabel>
-              <StatNumber>{stats.libraryCount}</StatNumber>
+              <StatLabel color={C.muted}>{t('gamesInLibrary')}</StatLabel>
+              <StatNumber color={C.text}>{stats.libraryCount}</StatNumber>
             </Stat>
           </Box>
-          <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+          <Box bg={C.card} p={6} borderRadius="lg" border="1px solid" borderColor={C.border} shadow="sm">
             <Stat>
-              <StatLabel>{t('reviewsWritten')}</StatLabel>
-              <StatNumber>{stats.reviewCount}</StatNumber>
+              <StatLabel color={C.muted}>{t('reviewsWritten')}</StatLabel>
+              <StatNumber color={C.text}>{stats.reviewCount}</StatNumber>
             </Stat>
           </Box>
           <Box 
-            bg="white" 
+            bg={C.card}
             p={6} 
             borderRadius="lg" 
+            border="1px solid"
+            borderColor={C.border}
             shadow="sm"
             cursor="pointer"
             onClick={() => setModalType('followers')}
-            _hover={{ bg: 'gray.50' }}
+            _hover={{ bg: C.elevated }}
           >
             <Stat>
-              <StatLabel>{t('followers')}</StatLabel>
-              <StatNumber>{stats.followersCount}</StatNumber>
+              <StatLabel color={C.muted}>{t('followers')}</StatLabel>
+              <StatNumber color={C.text}>{stats.followersCount}</StatNumber>
             </Stat>
           </Box>
           <Box 
-            bg="white" 
+            bg={C.card}
             p={6} 
             borderRadius="lg" 
+            border="1px solid"
+            borderColor={C.border}
             shadow="sm"
             cursor="pointer"
             onClick={() => setModalType('following')}
-            _hover={{ bg: 'gray.50' }}
+            _hover={{ bg: C.elevated }}
           >
             <Stat>
-              <StatLabel>{t('following')}</StatLabel>
-              <StatNumber>{stats.followingCount}</StatNumber>
+              <StatLabel color={C.muted}>{t('following')}</StatLabel>
+              <StatNumber color={C.text}>{stats.followingCount}</StatNumber>
             </Stat>
           </Box>
         </SimpleGrid>
 
-        <Divider />
+        <Divider borderColor={C.border} />
 
         {/* Achievements */}
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm">
+        <Box bg={C.card} p={6} borderRadius="lg" border="1px solid" borderColor={C.border} shadow="sm">
           <AchievementsSection userId={userId!} isOwnProfile={isOwnProfile} />
         </Box>
 
-        <Divider />
+        <Divider borderColor={C.border} />
 
         {/* Avis de l'utilisateur */}
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm">
-          <Heading size="md" mb={4}>Avis récents</Heading>
+        <Box bg={C.card} p={6} borderRadius="lg" border="1px solid" borderColor={C.border} shadow="sm">
+          <Heading size="md" mb={4} color={C.text}>Avis récents</Heading>
           {reviews.length === 0 ? (
-            <Text color="gray.600">Aucun avis pour le moment</Text>
+            <Text color={C.muted}>Aucun avis pour le moment</Text>
           ) : (
             <VStack spacing={4} align="stretch">
               {reviews.slice(0, 5).map((review) => (
@@ -383,10 +399,11 @@ export const UserProfile = () => {
                   key={review._id}
                   p={4}
                   borderWidth="1px"
+                  borderColor={C.border}
                   borderRadius="md"
                   cursor="pointer"
                   onClick={() => navigate(`/game/${review.content.externalId}`)}
-                  _hover={{ bg: 'gray.50' }}
+                  _hover={{ bg: C.elevated }}
                 >
                   <HStack spacing={4}>
                     {review.content.backgroundImage && (
@@ -399,12 +416,12 @@ export const UserProfile = () => {
                       />
                     )}
                     <VStack align="start" flex={1} spacing={1}>
-                      <Text fontWeight="bold">{review.content.title}</Text>
+                      <Text fontWeight="bold" color={C.text}>{review.content.title}</Text>
                       <HStack spacing={1}>{renderStars(review.rating)}</HStack>
-                      <Text fontSize="sm" color="gray.600" noOfLines={2}>
+                      <Text fontSize="sm" color={C.muted} noOfLines={2}>
                         {review.text}
                       </Text>
-                      <Text fontSize="xs" color="gray.500">
+                      <Text fontSize="xs" color={C.muted}>
                         {formatTimeAgo(review.createdAt)}
                       </Text>
                     </VStack>

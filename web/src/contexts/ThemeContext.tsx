@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { useColorMode } from '@chakra-ui/react';
 
 interface ThemeContextType {
@@ -18,18 +18,9 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const [isDark, setIsDark] = useState(colorMode === 'dark');
-
-  useEffect(() => {
-    setIsDark(colorMode === 'dark');
-  }, [colorMode]);
-
-  const toggleTheme = () => {
-    toggleColorMode();
-  };
 
   return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDark: colorMode === 'dark', toggleTheme: toggleColorMode }}>
       {children}
     </ThemeContext.Provider>
   );

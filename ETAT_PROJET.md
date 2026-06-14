@@ -1,226 +1,76 @@
-# État d'avancement du projet SUPCONTENT
+﻿# État du projet SUPCONTENT
 
-## ✅ COMPLÉTÉ (Backend fonctionnel)
+Dernière mise à jour: 27 avril 2026
 
-### 1. Configuration Backend (100%)
-- ✅ package.json avec toutes les dépendances
-- ✅ TypeScript configuré
-- ✅ Variables d'environnement (.env.example)
-- ✅ Configuration MongoDB, JWT, OAuth, RAWG API
-- ✅ WebSocket pour notifications temps réel
+## Résumé rapide
 
-### 2. Modèles de données (100%)
-- ✅ User (avec OAuth Google/GitHub)
-- ✅ Content (Jeux vidéo avec données RAWG)
-- ✅ Review (Critiques)
-- ✅ Library (Bibliothèque personnelle)
-- ✅ List (Listes personnalisées)
-- ✅ Follow (Abonnements)
-- ✅ Like, Comment
-- ✅ Notification
-- ✅ Activity (Fil d'actualité)
+- Backend: opérationnel et démarrable en local.
+- Frontend web: implémenté avec routes, contextes et pages principales.
+- Mobile principal (dossier mobile): base Expo/React Native existante, encore en développement.
+- Nouveau mobile collaborateur (dossier Supcontent-mobile-app): squelette Expo ajouté récemment via GitHub.
 
-### 3. Services Backend (100%)
-- ✅ authService (inscription, login, JWT, OAuth)
-- ✅ externalApiService (RAWG API avec cache)
-- ✅ contentService (recherche, détails jeux)
-- ✅ notificationService (notifications temps réel)
-- ✅ socialService (follow, feed, recherche utilisateurs)
+## Changements GitHub intégrés récemment
 
-### 4. Controllers & Routes (100%)
-- ✅ authController + authRoutes
-- ✅ contentController + contentRoutes
-- ✅ reviewController + reviewRoutes
-- ✅ libraryController + libraryRoutes
-- ✅ socialController + socialRoutes
-- ✅ userController + userRoutes
-- ✅ notificationController + notificationRoutes
+Commits récupérés sur main:
+- 5369779 (Agkader): Initialisation de l'application mobile React Native.
+- 10dc131 (Abdoul12Rahim): Merge PR #1 de la branche mobile.
 
-### 5. Middleware (100%)
-- ✅ authMiddleware (JWT verification)
-- ✅ adminMiddleware
-- ✅ errorHandler
-- ✅ validator
+Impact concret:
+- Ajout d'un nouveau dossier: Supcontent-mobile-app.
+- Fichiers ajoutés: App.js, index.js, app.json, package.json, package-lock.json, assets Expo.
 
-### 6. Docker & Déploiement (100%)
-- ✅ docker-compose.yml (MongoDB, Backend, Web)
-- ✅ Dockerfile backend
-- ✅ Dockerfile web
-- ✅ .env.example
+## État par composant
 
-### 7. Documentation (100%)
-- ✅ README.md complet avec instructions
-- ✅ Architecture documentée
-- ✅ Guide installation Docker
+### Backend (backend)
 
-## ⚠️ À COMPLÉTER (Frontend)
+- API Express + TypeScript en place (controllers, routes, services, modèles).
+- Connexion MongoDB et WebSocket configurés.
+- Endpoint santé disponible: /health.
+- Ajustement de compatibilité TypeScript effectué dans tsconfig.json (module et moduleResolution en Node16).
 
-### Frontend Web (React)
+### Frontend Web (web)
 
-#### Fichiers essentiels à créer
+- Stack active: React + Vite + TypeScript + Chakra UI + React Query + React Router.
+- Routing avancé déjà en place (home, games, feed, reviews, profil, messages, notifications, achievements, listes collaboratives).
+- Le frontend web n'est pas vide, il est déjà structuré et partiellement fonctionnel.
 
-1. **src/index.tsx**
-```typescript
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { ChakraProvider } from '@chakra-ui/react';
-import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import App from './App';
+### Mobile principal (mobile)
 
-const queryClient = new QueryClient();
+- Projet Expo TypeScript présent.
+- Arborescence métier présente (components, contexts, navigation, screens, services).
+- Écran d'entrée encore simple, indiquant un développement en cours.
 
-const root = ReactDOM.createRoot(document.getElementById('root')!);
-root.render(
-  <React.StrictMode>
-    <ChakraProvider>
-      <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </BrowserRouter>
-    </ChakraProvider>
-  </React.StrictMode>
-);
-```
+### Mobile collaborateur (Supcontent-mobile-app)
 
-2. **src/App.tsx**
-```typescript
-import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import Home from './pages/Home';
-import Login from './components/Auth/Login';
-// ... autres imports
+- Projet Expo JavaScript indépendant ajouté récemment.
+- Démarrage validé en local (Expo/Metro).
+- Visualisation possible:
+- Web: http://localhost:8081
+- Expo Go: via QR terminal (exp://...)
 
-function App() {
-  return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        {/* ... autres routes */}
-      </Routes>
-    </AuthProvider>
-  );
-}
-```
+## Exécution locale validée
 
-3. **src/services/api.ts** - Service API axios
-4. **src/contexts/AuthContext.tsx** - Gestion authentification
-5. **src/contexts/ThemeContext.tsx** - Gestion thème
-6. **src/contexts/NotificationContext.tsx** - WebSocket notifications
+Backend:
+- npm --prefix backend run dev
+- Santé: http://localhost:5000/health
 
-7. **Composants à créer** (dans src/components/):
-   - Auth/Login.tsx
-   - Auth/Register.tsx
-   - Content/GameCard.tsx
-   - Content/GameList.tsx
-   - Content/SearchBar.tsx
-   - Library/LibraryList.tsx
-   - Social/Feed.tsx
-   - Social/UserCard.tsx
-   - Layout/Header.tsx
-   - Layout/Sidebar.tsx
+Web:
+- npm --prefix web run dev -- --host 0.0.0.0 --port 3000
+- URL: http://localhost:3000
 
-8. **Pages à créer** (dans src/pages/):
-   - Home.tsx
-   - ContentPage.tsx  
-   - Library.tsx
-   - Profile.tsx
-   - Feed.tsx
+Mobile collaborateur:
+- npm --prefix Supcontent-mobile-app start
+- Expo Web: http://localhost:8081
 
-### Frontend Mobile (React Native/Expo)
+## Points d'attention
 
-#### package.json mobile à créer
-```json
-{
-  "name": "supcontent-mobile",
-  "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "dependencies": {
-    "expo": "~49.0.0",
-    "react": "18.2.0",
-    "react-native": "0.72.4",
-    "react-native-paper": "^5.10.0",
-    "@react-navigation/native": "^6.1.7",
-    "axios": "^1.5.0"
-  }
-}
-```
+- Un seul processus doit occuper le port 5000 (sinon erreur EADDRINUSE).
+- Le projet Supcontent-mobile-app remonte des warnings de versions Expo (non bloquants pour un test rapide).
+- Le fichier backend/tsconfig.json est actuellement modifié localement (non commité).
 
-Structure similar au web mais avec composants React Native.
+## Prochaines priorités conseillées
 
-## 🚀 Pour démarrer le développement
-
-### 1. Backend (Déjà fonctionnel)
-
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Remplir le fichier .env avec vos clés
-npm run dev
-```
-
-### 2. Frontend Web (À compléter)
-
-```bash
-cd web
-npm install
-# Créer les fichiers listés ci-dessus
-npm start
-```
-
-### 3. Frontend Mobile (À créer)
-
-```bash
-cd mobile
-# Créer package.json
-npm install
-npx expo start
-```
-
-## 📝 Notes importantes
-
-1. **Le backend est 100% opérationnel** et prêt à être utilisé
-2. **Docker compose up** lancera MongoDB + Backend sans erreur
-3. **Les fichiers frontend existent mais sont vides** - ils doivent être complétés
-4. **Structure recommandée** : Commencer par créer les services API (axios) et les contextes, puis les composants
-
-## 🎯 Priorités de développement Frontend
-
-1. **Critique** (pour avoir un MVP):
-   - services/api.ts
-   - contexts/AuthContext.tsx
-   - components/Auth/Login.tsx + Register.tsx
-   - pages/Home.tsx (liste de jeux)
-   - components/Content/GameCard.tsx
-
-2. **Important** (pour fonctionnalités principales):
-   - pages/ContentPage.tsx (détails jeu)
-   - components/Library/LibraryList.tsx
-   - components/Social/Feed.tsx
-   - contexts/NotificationContext.tsx (WebSocket)
-
-3. **Améliorations** (pour compléter l'expérience):
-   - pages/Profile.tsx
-   - Thème clair/sombre
-   - Responsive design
-   - Animations
-
-## 📚 Ressources
-
-- **Backend API**: http://localhost:5000/api
-- **Documentation Chakra UI**: https://chakra-ui.com/
-- **React Query**: https://tanstack.com/query/latest
-- **React Router**: https://reactrouter.com/
-
----
-
-**Le backend est production-ready. Le front attend d'être complété selon votre design Figma!**
+1. Décider quelle app mobile conserver comme base officielle: mobile ou Supcontent-mobile-app.
+2. Harmoniser les versions Expo/React Native sur l'app mobile retenue.
+3. Centraliser la documentation de démarrage pour éviter les doublons entre les deux apps mobiles.
+4. Préparer un commit de stabilisation (tsconfig backend + état projet + éventuels scripts de lancement).

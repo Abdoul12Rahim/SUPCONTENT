@@ -47,7 +47,17 @@ export const Login = () => {
   };
 
   return (
-    <Box maxW="md" mx="auto" mt={8} p={6} borderWidth={1} borderRadius="lg" bg="white">
+    <Box
+      maxW="md"
+      mx="auto"
+      mt={8}
+      p={6}
+      borderWidth={1}
+      borderRadius="lg"
+      bg="ui.card"
+      borderColor="ui.border"
+      color="ui.text"
+    >
       <VStack spacing={4} as="form" onSubmit={handleSubmit} autoComplete="off">
         <Heading size="lg">Connexion</Heading>
         
@@ -73,18 +83,13 @@ export const Login = () => {
           />
         </FormControl>
 
-        <Button
-          type="submit"
-          colorScheme="blue"
-          width="full"
-          isLoading={loading}
-        >
+        <Button type="submit" bg="#7c3aed" color="white" width="full" isLoading={loading} _hover={{ bg: '#6d28d9' }}>
           Se connecter
         </Button>
 
         <Text fontSize="sm">
           Pas encore de compte ?{' '}
-          <ChakraLink as={Link} to="/register" color="blue.500">
+          <ChakraLink as={Link} to="/register" color="#a78bfa">
             S'inscrire
           </ChakraLink>
         </Text>

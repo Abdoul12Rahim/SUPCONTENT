@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { translations, Language, TranslationKey } from '../utils/translations';
 
 interface LanguageContextType {
@@ -22,6 +22,20 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const saved = localStorage.getItem('language');
     return (saved as Language) || 'fr';
   });
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'language' && event.newValue) {
+        setLanguageState(event.newValue as Language);
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
