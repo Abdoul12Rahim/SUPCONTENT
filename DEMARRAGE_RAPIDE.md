@@ -6,7 +6,8 @@
 
 ```bash
 # Cloner et accéder au projet
-cd c:\Users\PC\Downloads\SUPCONTENT\supcontent
+git clone https://github.com/Abdoul12Rahim/SUPCONTENT.git 
+cd supcontent
 
 # Créer le fichier .env à partir de l'exemple
 copy .env.example .env

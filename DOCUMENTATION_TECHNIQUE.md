@@ -129,3 +129,45 @@ Ces structures ne sont pas des collections séparées MongoDB, mais des tableaux
 ## 4. Remarque d’architecture
 
 Le schéma est orienté MongoDB/Mongoose. Certaines relations UML sont logiques et non matérialisées comme des tables SQL séparées. Pour cette raison, les cardinalités doivent être lues comme des dépendances de documents et non comme des clés étrangères strictes.
+
+## 5. Prérequis:
+
+- Node.js >= 18.0.0 
+- npm >= 9.0.0
+- Compte RAWG API (gratuit) : https://rawg.io/apidocs 
+  
+## 6. Cloner le projet
+
+Dans votre terminal et le dossier souhaité effectuez cette commande (si le projet n’est pas déjà sur votre pc).
+````bash
+git clone https://github.com/Abdoul12Rahim/SUPCONTENT.git 
+cd supcontent
+````
+
+## 7. Lancement et configuration du Frontend Web et Mobile
+
+Pour lancer le projet et configurer le frontend mobile rendez-vous dans le fichier `DEMARRAGE_RAPIDE.md`
+
+## 8. Déploiement du projet
+
+Local:
+- API backend : http://localhost:5000/api
+- WebSocket / Socket.IO : http://localhost:5000/
+
+Prod;
+- API backend : https://supcontent-production.up.railway.app/api
+- WebSocket : https://supcontent-production.up.railway.app/
+
+## 8. Justification des choix technologiques
+
+Frontend Web:
+- `React avec Vite `: React a été choisi pour son architecture basée sur des composants réutilisables, ce qui fluidifie le développement de l'interface du réseau social. De plus, Vite offre un serveur de développement instantané grâce aux modules ES natifs et des builds de production optimisés.
+
+Backend:
+- `Node.js`: Node.js est idéal pour les applications réseau nécessitant une forte scalabilité ce qui est indispensable pour notre système de notifications en temps réel. Utiliser Express.js nous a permis de mettre en place une API REST robuste, légère et flexible de manière très rapide
+
+Base de données:
+- `MongoDB`: MongoDB fournit une base de données NoSQL orientée documents. Contrairement à une base SQL rigide, MongoDB permet de stocker des objets JSON flexibles. C'est parfait pour notre projet où les fiches de jeux vidéo (récupérées via l'API RAWG) possèdent des structures de données variables selon les catégories. Cela nous évite des jointures complexes et accélère le temps de réponse de l'API.
+
+Mobile:
+- `expo`: Expo a été choisi comme surcouche à React pour sa capacité à accélérer le cycle de développement mobile. Contrairement à une installation React classique, Expo élimine le besoin de configurer les outils natifs complexes (Xcode et Android Studio) en début de projet. Il a permis à notre équipe de tester l'application en temps réel, que nos téléphones soient en android ou en IOS.
