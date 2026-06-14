@@ -5,13 +5,15 @@ import {
   ModalBody, ModalFooter, ModalCloseButton,
   Textarea, Switch, FormControl, FormLabel,
   useDisclosure, useToast, Divider, Tooltip,
-  SimpleGrid, Container, 
+  SimpleGrid, Container,
+  Spinner,
   useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { SearchIcon, AddIcon, LockIcon, UnlockIcon } from '@chakra-ui/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { contentAPI, roomsAPI } from '../services/api';
 
 
 
@@ -73,6 +75,18 @@ const INITIAL_ROOMS = [
 
 type Room = typeof INITIAL_ROOMS[0];
 type Message = { id: string; senderId: string; senderName: string; avatar: string; content: string; time: string };
+type SelectedGame = { id: string; name: string; image: string };
+
+type ApiRoom = {
+  _id: string;
+  name: string;
+  description?: string;
+  avatar?: string;
+  creator?: string;
+  visibility: 'public' | 'private';
+  members?: Array<{ user?: { _id?: string; username?: string; avatar?: string }; role?: 'admin' | 'moderator' | 'normal' }>;
+  rules?: string;
+};
 
 export const Rooms = () => {
   // ─── Palette identique au mobile ───────────────────────────────────────────
@@ -114,7 +128,120 @@ export const Rooms = () => {
   const [newRoomName, setNewRoomName] = useState('');
   const [newRoomDesc, setNewRoomDesc] = useState('');
   const [newRoomPublic, setNewRoomPublic] = useState(true);
-  const [selectedGame, setSelectedGame] = useState<typeof GAME_OPTIONS[0] | null>(null);
+  const [selectedGame, setSelectedGame] = useState<SelectedGame | null>(null);
+  const [gameSearchQuery, setGameSearchQuery] = useState('');
+  const [gameSearchResults, setGameSearchResults] = useState<SelectedGame[]>([]);
+  const [searchingGames, setSearchingGames] = useState(false);
+  const [manageModalOpen, setManageModalOpen] = useState(false);
+
+  const mapApiRoomToUi = (apiRoom: ApiRoom): Room => {
+    const fallbackGame = GAME_OPTIONS.find((g) => apiRoom.name.toLowerCase().includes(g.name.toLowerCase())) || GAME_OPTIONS[0];
+    const members = (apiRoom.members || []).map((m, idx) => ({
+      id: m.user?._id || `m-${idx}`,
+      name: m.user?.username || 'Membre',
+      avatar: m.user?.avatar || '',
+      isAdmin: m.role === 'admin',
+    }));
+
+    return {
+      id: apiRoom._id,
+      game: apiRoom.name || fallbackGame.name,
+      image: apiRoom.avatar || fallbackGame.image,
+      description: apiRoom.description || 'Salon de discussion gaming',
+      lastMessage: apiRoom.description || 'Nouveau salon',
+      lastTime: '',
+      unread: 0,
+      isPublic: apiRoom.visibility !== 'private',
+      joined: members.some((m) => m.id === user?._id),
+      members,
+      rules: apiRoom.rules ? [apiRoom.rules] : ['Respect entre membres', 'Pas de spam'],
+      messages: [],
+    };
+  };
+
+  const canManageRoom = (room: Room | null) => {
+    if (!room || !user?._id) return false;
+    const me = room.members.find((m) => m.id === user._id);
+    return !!me?.isAdmin;
+  };
+
+  const fetchRooms = async () => {
+    try {
+      const response = await roomsAPI.getActive();
+      const apiRooms: ApiRoom[] = Array.isArray(response.data) ? response.data : [];
+      const normalized = apiRooms.map(mapApiRoomToUi);
+      setRooms(normalized.length > 0 ? normalized : INITIAL_ROOMS);
+    } catch (error) {
+      console.error('Erreur chargement salons:', error);
+      setRooms(INITIAL_ROOMS);
+    }
+  };
+
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchRooms();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchRooms();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const query = gameSearchQuery.trim();
+    if (query.length < 2) {
+      setGameSearchResults([]);
+      setSearchingGames(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setSearchingGames(true);
+        const response = await contentAPI.search(query, 1);
+        const rawResults = Array.isArray(response.data?.results) ? response.data.results : [];
+        const mapped: SelectedGame[] = rawResults
+          .map((g: any) => {
+            const id = g?.externalId ?? g?.id;
+            const name = g?.title ?? g?.name;
+            const image = g?.backgroundImage ?? g?.background_image ?? GAME_OPTIONS[0].image;
+            if (!id || !name) return null;
+            return {
+              id: String(id),
+              name,
+              image,
+            };
+          })
+          .filter(Boolean) as SelectedGame[];
+
+        const unique = new Map<string, SelectedGame>();
+        mapped.forEach((g) => unique.set(g.id, g));
+        setGameSearchResults(Array.from(unique.values()).slice(0, 12));
+      } catch (error) {
+        console.error('Erreur recherche jeux:', error);
+        setGameSearchResults([]);
+      } finally {
+        setSearchingGames(false);
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [gameSearchQuery]);
 
   const filteredRooms = rooms.filter(
     (r) =>
@@ -156,6 +283,45 @@ export const Rooms = () => {
     toast({ title: 'Salon quitté', status: 'warning', duration: 3000 });
   };
 
+  const handleDeleteRoom = async () => {
+    if (!activeRoom) return;
+    try {
+      await roomsAPI.deleteRoom(activeRoom.id);
+      toast({ title: 'Salon supprimé', status: 'success', duration: 2500 });
+      setManageModalOpen(false);
+      setActiveRoom(null);
+      await fetchRooms();
+    } catch (error: any) {
+      toast({
+        title: 'Suppression impossible',
+        description: error?.response?.data?.message || 'Action refusée',
+        status: 'error',
+        duration: 3500,
+      });
+    }
+  };
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!activeRoom) return;
+    try {
+      await roomsAPI.removeMember(activeRoom.id, memberId);
+      const updated = {
+        ...activeRoom,
+        members: activeRoom.members.filter((m) => m.id !== memberId),
+      };
+      setActiveRoom(updated);
+      setRooms((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      toast({ title: 'Membre retiré', status: 'success', duration: 2200 });
+    } catch (error: any) {
+      toast({
+        title: 'Action impossible',
+        description: error?.response?.data?.message || 'Impossible de retirer ce membre',
+        status: 'error',
+        duration: 3500,
+      });
+    }
+  };
+
   const sendMessage = () => {
     if (!inputText.trim() || !activeRoom) return;
     const msg: Message = {
@@ -172,30 +338,36 @@ export const Rooms = () => {
     setInputText('');
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newRoomName.trim() || !selectedGame) {
       toast({ title: 'Remplis le nom et le jeu', status: 'error', duration: 3000 });
       return;
     }
-    const newRoom: Room = {
-      id: `r${Date.now()}`,
-      game: selectedGame.name,
-      image: selectedGame.image,
-      description: newRoomDesc || `Salon ${selectedGame.name}`,
-      lastMessage: 'Salon créé !',
-      lastTime: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-      unread: 0,
-      isPublic: newRoomPublic,
-      joined: true,
-      members: [{ id: 'me', name: user?.username || 'Moi', avatar: '', isAdmin: true }],
-      rules: [],
-      messages: [{ id: 'm1', senderId: 'me', senderName: user?.username || 'Moi', avatar: '', content: `Salon ${newRoomName} créé ! 🎮`, time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) }],
-    };
-    setRooms((prev) => [newRoom, ...prev]);
-    setActiveRoom(newRoom);
-    createModal.onClose();
-    setNewRoomName(''); setNewRoomDesc(''); setSelectedGame(null);
-    toast({ title: 'Salon créé !', status: 'success', duration: 3000 });
+    try {
+      await roomsAPI.create({
+        name: newRoomName.trim(),
+        description: newRoomDesc.trim() || `Salon ${selectedGame.name}`,
+        visibility: newRoomPublic ? 'public' : 'private',
+        avatar: selectedGame.image,
+        rules: 'Respect entre membres',
+      });
+
+      createModal.onClose();
+      setNewRoomName('');
+      setNewRoomDesc('');
+      setSelectedGame(null);
+      setGameSearchQuery('');
+      setGameSearchResults([]);
+      await fetchRooms();
+      toast({ title: 'Salon créé !', status: 'success', duration: 3000 });
+    } catch (error: any) {
+      toast({
+        title: 'Erreur création salon',
+        description: error?.response?.data?.message || 'Impossible de créer le salon',
+        status: 'error',
+        duration: 3500,
+      });
+    }
   };
 
   // ── Layout : liste à gauche, chat à droite ────────────────────────────────
@@ -316,6 +488,11 @@ export const Rooms = () => {
                 <Button size="xs" variant="outline" colorScheme="red" onClick={leaveRoom}>
                   Quitter
                 </Button>
+                {canManageRoom(activeRoom) && (
+                  <Button size="xs" bg={C.primaryLight} color={C.primary} onClick={() => setManageModalOpen(true)}>
+                    Gérer
+                  </Button>
+                )}
               </Flex>
 
               {/* Messages */}
@@ -483,8 +660,39 @@ export const Rooms = () => {
               </FormControl>
               <FormControl>
                 <FormLabel fontSize="sm" color={C.textMuted}>Jeu associé</FormLabel>
+                <InputGroup size="sm" mb={3}>
+                  <InputLeftElement pointerEvents="none">
+                    <SearchIcon color={C.textMuted} />
+                  </InputLeftElement>
+                  <Input
+                    placeholder="Rechercher un jeu dans la base..."
+                    value={gameSearchQuery}
+                    onChange={(e) => setGameSearchQuery(e.target.value)}
+                    bg={C.surfaceElevated}
+                    border="none"
+                    color={C.textLight}
+                    _placeholder={{ color: C.textMuted }}
+                  />
+                </InputGroup>
+
+                {selectedGame && (
+                  <HStack mb={3} p={2} borderRadius="lg" bg={C.primaryLight} border={`1px solid ${C.primaryBorder}`}>
+                    <Box w="28px" h="28px" borderRadius="md" overflow="hidden" flexShrink={0}>
+                      <img src={selectedGame.image} alt={selectedGame.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </Box>
+                    <Text fontSize="sm" color={C.textLight} noOfLines={1} flex={1}>
+                      Jeu sélectionné : {selectedGame.name}
+                    </Text>
+                  </HStack>
+                )}
+
+                {searchingGames ? (
+                  <Flex justify="center" py={3}>
+                    <Spinner size="sm" color={C.primary} />
+                  </Flex>
+                ) : (
                 <SimpleGrid columns={3} spacing={2}>
-                  {GAME_OPTIONS.map((g) => (
+                  {(gameSearchQuery.trim().length >= 2 ? gameSearchResults : GAME_OPTIONS).map((g) => (
                     <Box
                       key={g.id}
                       p={2} borderRadius="lg" cursor="pointer" textAlign="center"
@@ -499,6 +707,13 @@ export const Rooms = () => {
                     </Box>
                   ))}
                 </SimpleGrid>
+                )}
+
+                {!searchingGames && gameSearchQuery.trim().length >= 2 && gameSearchResults.length === 0 && (
+                  <Text mt={2} fontSize="xs" color={C.textMuted}>
+                    Aucun jeu trouvé pour cette recherche.
+                  </Text>
+                )}
               </FormControl>
               <FormControl>
                 <Flex justify="space-between" align="center">
@@ -520,6 +735,41 @@ export const Rooms = () => {
             <Button bg={C.primary} color="white" onClick={handleCreate}>
               Créer le salon
             </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* ── Modal Gestion propriétaire ── */}
+      <Modal isOpen={manageModalOpen} onClose={() => setManageModalOpen(false)} isCentered>
+        <ModalOverlay backdropFilter="blur(4px)" />
+        <ModalContent bg={C.surface} border={`1px solid ${C.border}`} color={C.textLight}>
+          <ModalHeader>🛠️ Gérer le salon</ModalHeader>
+          <ModalCloseButton color={C.textMuted} />
+          <ModalBody>
+            <Text fontSize="sm" color={C.textMuted} mb={3}>Retirer un membre :</Text>
+            <VStack align="stretch" spacing={2} maxH="260px" overflowY="auto">
+              {(activeRoom?.members || [])
+                .filter((m) => m.id !== user?._id)
+                .map((m) => (
+                  <HStack key={m.id} justify="space-between" p={2} borderRadius="md" bg={C.surfaceElevated}>
+                    <HStack>
+                      <Avatar size="xs" src={m.avatar} name={m.name} />
+                      <Text fontSize="sm" color={C.textLight}>{m.name}</Text>
+                    </HStack>
+                    <Button size="xs" variant="ghost" color={C.danger} onClick={() => handleRemoveMember(m.id)}>
+                      Retirer
+                    </Button>
+                  </HStack>
+                ))}
+            </VStack>
+            <Divider my={4} borderColor={C.border} />
+            <Text fontSize="sm" color={C.textMuted} mb={2}>Zone danger :</Text>
+            <Button size="sm" bg={C.danger} color="white" _hover={{ opacity: 0.9 }} onClick={handleDeleteRoom}>
+              Supprimer ce salon
+            </Button>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" color={C.textMuted} onClick={() => setManageModalOpen(false)}>Fermer</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

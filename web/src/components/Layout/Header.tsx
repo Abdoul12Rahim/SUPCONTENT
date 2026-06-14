@@ -264,7 +264,11 @@ export const Header = () => {
                       </MenuItem>
                     </Link>
                     <MenuDivider/>
-                    <MenuItem  color= {navTextActive} _hover={{ color: navTextActive }}>
+                    <MenuItem
+                      color={navTextActive}
+                      _hover={{ color: navTextActive }}
+                      onClick={handleLogout}
+                    >
                       🚪 {t('logout')}
                     </MenuItem>
                   </MenuList>

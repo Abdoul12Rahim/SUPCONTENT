@@ -106,12 +106,22 @@ export const sendVoiceNote = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Fichier audio manquant' });
     }
 
+    const normalizeAudioMimeType = (mimeType: string) => {
+      const lower = (mimeType || '').toLowerCase();
+      if (lower.includes('webm')) return 'audio/webm';
+      if (lower.includes('mp4') || lower.includes('m4a') || lower.includes('aac')) return 'audio/mp4';
+      if (lower.includes('ogg')) return 'audio/ogg';
+      if (lower.includes('wav')) return 'audio/wav';
+      return mimeType.split(';')[0] || 'audio/webm';
+    };
+
     const audioUrl = `/api/uploads/voice-notes/${req.file.filename}`;
+    const audioMimeType = normalizeAudioMimeType(req.file.mimetype || 'audio/webm');
 
     const message = await messageService.sendMessage(conversationId, req.user!._id, '[Note vocale]', {
       messageType: 'voice',
       audioUrl,
-      audioMimeType: req.file.mimetype,
+      audioMimeType,
       audioDuration: Number.isFinite(audioDuration) ? audioDuration : undefined,
     });
 

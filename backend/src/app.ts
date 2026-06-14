@@ -26,6 +26,7 @@ import collaborativeListRoutes from './routes/collaborativeListRoutes';
 import listRoutes from './routes/listRoutes';
 import searchRoutes from './routes/searchRoutes';
 import adminRoutes from './routes/adminRoutes';
+import roomRoutes from './routes/roomRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -101,6 +102,7 @@ app.use('/api/collaborative-lists', collaborativeListRoutes);
 app.use('/api/lists', listRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/rooms', roomRoutes);
 
 // Gestion des erreurs
 app.use(errorHandler);

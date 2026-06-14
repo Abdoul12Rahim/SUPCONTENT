@@ -16,6 +16,13 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Important: laisser le navigateur poser automatiquement la boundary multipart.
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData && config.headers) {
+      delete (config.headers as any)['Content-Type'];
+      delete (config.headers as any)['content-type'];
+    }
+
     return config;
   },
   (error: AxiosError) => Promise.reject(error)
@@ -27,7 +34,6 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -232,6 +238,12 @@ export const dealsAPI = {
 
 export const roomsAPI = {
   getActive: () => api.get('/rooms/active'),
+  create: (data: { name: string; description?: string; visibility?: 'public' | 'private'; rules?: string; avatar?: string }) =>
+    api.post('/rooms', data),
+  join: (roomId: string) => api.post(`/rooms/${roomId}/join`),
+  leave: (roomId: string) => api.post(`/rooms/${roomId}/leave`),
+  removeMember: (roomId: string, targetUserId: string) => api.post(`/rooms/${roomId}/remove/${targetUserId}`),
+  deleteRoom: (roomId: string) => api.delete(`/rooms/${roomId}`),
   getEvents: async () => {
     try {
       const res = await api.get('/events/live');

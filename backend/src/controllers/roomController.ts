@@ -17,11 +17,11 @@ export const getActiveRooms = async (req: Request, res: Response) => {
 
 export const createRoom = async (req: Request, res: Response) => {
   try {
-    const { name, description, visibility, rules } = req.body;
+    const { name, description, visibility, rules, avatar } = req.body;
     const currentUserId = req.user!._id;
 
     const newRoom = new Room({
-      name, description, visibility, rules,
+      name, description, visibility, rules, avatar,
       creator: currentUserId,
       members: [{
         user: currentUserId,
@@ -205,5 +205,37 @@ export const deleteRoom = async (req: Request, res: Response) => {
     res.json({ message: "Le salon a été définitivement supprimé." });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const removeMember = async (req: Request, res: Response) => {
+  try {
+    const { targetUserId } = req.params;
+    const currentUserId = req.user!._id;
+    const room = (req as any).room;
+
+    // Ne jamais permettre de retirer le créateur original.
+    if (room.creator.toString() === targetUserId) {
+      return res.status(400).json({ message: 'Impossible de retirer le créateur du salon.' });
+    }
+
+    const currentMember = room.members.find((m: any) => m.user.toString() === currentUserId.toString());
+    const targetMember = room.members.find((m: any) => m.user.toString() === targetUserId);
+
+    if (!targetMember) {
+      return res.status(404).json({ message: 'Membre introuvable dans ce salon.' });
+    }
+
+    // Un modérateur ne peut pas retirer un admin/modérateur.
+    if (currentMember?.role === 'moderator' && ['admin', 'moderator'].includes(targetMember.role)) {
+      return res.status(403).json({ message: "Vous n'avez pas l'autorité pour retirer ce membre." });
+    }
+
+    room.members = room.members.filter((m: any) => m.user.toString() !== targetUserId);
+    await room.save();
+
+    res.json({ message: 'Membre retiré du salon.' });
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
   }
 };

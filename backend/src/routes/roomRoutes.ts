@@ -18,6 +18,7 @@ router.post('/:roomId/leave', roomController.leaveRoom);
 // Les Modérateurs et les Admins partagent ces droits de gestion de communauté
 router.post('/:roomId/accept/:targetUserId', checkRoomRole(['admin', 'moderator']), roomController.acceptRequest);
 router.post('/:roomId/ban/:targetUserId', checkRoomRole(['admin', 'moderator']), roomController.banUser);
+router.post('/:roomId/remove/:targetUserId', checkRoomRole(['admin', 'moderator']), roomController.removeMember);
 router.get('/:roomId/banned', checkRoomRole(['admin', 'moderator']), roomController.getBannedUsers);
 
 // --- ROUTES STRICTEMENT ADMINS ---

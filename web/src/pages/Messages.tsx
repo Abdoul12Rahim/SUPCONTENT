@@ -106,6 +106,7 @@ export const Messages = () => {
   const [pendingVoiceBlob, setPendingVoiceBlob] = useState<Blob | null>(null);
   const [pendingVoiceUrl, setPendingVoiceUrl] = useState<string | null>(null);
   const [pendingVoiceDuration, setPendingVoiceDuration] = useState(0);
+  const [failedAudioMessageIds, setFailedAudioMessageIds] = useState<string[]>([]);
   const contactsFallbackRef = useRef<UserSearchItem[] | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -133,6 +134,19 @@ const primaryBorder = 'rgba(124,58,237,0.35)';
     if (/^https?:\/\//i.test(url)) return url;
     const apiBase = (import.meta.env.VITE_API_URL || 'https://supcontent-production.up.railway.app/api').replace(/\/api\/?$/, '');
     return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const normalizeAudioMimeType = (mimeType?: string, audioUrl?: string) => {
+    const lower = (mimeType || '').toLowerCase();
+    if (lower.includes('webm')) return 'audio/webm';
+    if (lower.includes('mp4') || lower.includes('m4a') || lower.includes('aac')) return 'audio/mp4';
+    if (lower.includes('ogg')) return 'audio/ogg';
+    if (lower.includes('wav')) return 'audio/wav';
+
+    if (audioUrl?.endsWith('.m4a') || audioUrl?.endsWith('.mp4')) return 'audio/mp4';
+    if (audioUrl?.endsWith('.ogg')) return 'audio/ogg';
+    if (audioUrl?.endsWith('.wav')) return 'audio/wav';
+    return 'audio/webm';
   };
 
   const formatRecordingTime = (totalSeconds: number) => {
@@ -494,8 +508,7 @@ const primaryBorder = 'rgba(124,58,237,0.35)';
 
       const response = await api.post(
         `/messages/conversations/${selectedConversation._id}/voice-note`,
-        formData,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        formData
       );
 
       setMessages((prev) => [...prev, response.data]);
@@ -987,25 +1000,74 @@ const primaryBorder = 'rgba(124,58,237,0.35)';
                                 <Box
                                   minW={{ base: '220px', md: '260px' }}
                                   maxW="100%"
-                                  bg={isOwn ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.18)'}
+                                  bg={isOwn ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.18)'}
                                   border="1px solid"
                                   borderColor={isOwn ? 'rgba(255,255,255,0.16)' : C.border}
-                                  borderRadius="xl"
-                                  p={2}
+                                  borderRadius="2xl"
+                                  p={3}
+                                  display="flex"
+                                  flexDirection="column"
+                                  gap={2}
                                 >
-                                  <audio controls style={{ width: '100%', display: 'block' }} preload="metadata">
-                                    <source src={getMediaUrl(message.audioUrl)} type={message.audioMimeType || 'audio/webm'} />
-                                    <source src={getMediaUrl(message.audioUrl)} type="audio/mp4" />
-                                    <source src={getMediaUrl(message.audioUrl)} type="audio/ogg" />
-                                    Votre navigateur ne supporte pas la lecture audio.
-                                  </audio>
-                                  <Text
-                                    fontSize="xs"
-                                    color={isOwn ? 'rgba(255,255,255,0.8)' : C.muted}
-                                    mt={1}
+                                  <HStack justify="space-between" align="center" spacing={3}>
+                                    <Text fontSize="xs" fontWeight="700" color={isOwn ? 'white' : C.text}>
+                                      Note vocale
+                                    </Text>
+                                    <Text fontSize="xs" color={isOwn ? 'rgba(255,255,255,0.75)' : C.muted}>
+                                      {message.audioDuration ? formatRecordingTime(message.audioDuration) : '00:00'}
+                                    </Text>
+                                  </HStack>
+                                  <Box
+                                    bg={isOwn ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.05)'}
+                                    borderRadius="xl"
+                                    px={3}
+                                    py={2}
                                   >
-                                    {`Note vocale${message.audioDuration ? ` • ${formatRecordingTime(message.audioDuration)}` : ''}`}
-                                  </Text>
+                                    <audio
+                                      controls
+                                      style={{ width: '100%', display: 'block', maxWidth: '100%' }}
+                                      preload="metadata"
+                                      onError={() => {
+                                        setFailedAudioMessageIds((prev) =>
+                                          prev.includes(message._id) ? prev : [...prev, message._id]
+                                        );
+                                      }}
+                                    >
+                                      <source
+                                        src={getMediaUrl(message.audioUrl)}
+                                        type={normalizeAudioMimeType(message.audioMimeType, message.audioUrl)}
+                                      />
+                                      <source src={getMediaUrl(message.audioUrl)} type="audio/mp4" />
+                                      <source src={getMediaUrl(message.audioUrl)} type="audio/ogg" />
+                                      Votre navigateur ne supporte pas la lecture audio.
+                                    </audio>
+                                  </Box>
+                                  {failedAudioMessageIds.includes(message._id) && (
+                                    <HStack spacing={2} wrap="wrap">
+                                      <Button
+                                        as="a"
+                                        href={getMediaUrl(message.audioUrl)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        size="xs"
+                                        variant="outline"
+                                        color={isOwn ? 'white' : C.text}
+                                        borderColor={isOwn ? 'rgba(255,255,255,0.35)' : C.border}
+                                      >
+                                        Ouvrir l'audio
+                                      </Button>
+                                      <Button
+                                        as="a"
+                                        href={getMediaUrl(message.audioUrl)}
+                                        download
+                                        size="xs"
+                                        variant="ghost"
+                                        color={isOwn ? 'rgba(255,255,255,0.85)' : C.muted}
+                                      >
+                                        Télécharger
+                                      </Button>
+                                    </HStack>
+                                  )}
                                 </Box>
                               ) : (
                                 <Text whiteSpace="pre-wrap" wordBreak="break-word" overflowWrap="anywhere" lineHeight="1.5">

@@ -28,7 +28,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/api';
+import { authAPI, collaborativeListAPI, libraryAPI, listAPI, notificationAPI } from '../services/api';
 import { getAvatarUrl } from '../utils/avatar';
 
 export const Settings = () => {
@@ -38,6 +38,7 @@ export const Settings = () => {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // États pour le profil
@@ -284,6 +285,64 @@ export const Settings = () => {
         status: 'error',
         duration: 5000,
       });
+    }
+  };
+
+  const handleDownloadData = async () => {
+    if (!user) return;
+
+    try {
+      setExportLoading(true);
+
+      const [me, library, personalLists, collaborativeLists, notifications] = await Promise.allSettled([
+        authAPI.getMe(),
+        libraryAPI.getMy(undefined, 1),
+        listAPI.getMyLists(),
+        collaborativeListAPI.getMyLists(),
+        notificationAPI.getAll(1),
+      ]);
+
+      const pickResult = (result: PromiseSettledResult<any>) =>
+        result.status === 'fulfilled' ? result.value?.data : null;
+
+      const exportPayload = {
+        exportedAt: new Date().toISOString(),
+        userId: user._id,
+        profile: pickResult(me),
+        library: pickResult(library),
+        personalLists: pickResult(personalLists),
+        collaborativeLists: pickResult(collaborativeLists),
+        notifications: pickResult(notifications),
+      };
+
+      const content = JSON.stringify(exportPayload, null, 2);
+      const blob = new Blob([content], { type: 'application/json;charset=utf-8' });
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeDate = new Date().toISOString().slice(0, 10);
+
+      link.href = objectUrl;
+      link.download = `supcontent-donnees-${safeDate}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+
+      toast({
+        title: 'Téléchargement prêt',
+        description: 'Vos données ont été exportées en JSON.',
+        status: 'success',
+        duration: 3000,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erreur',
+        description: error?.response?.data?.message || 'Impossible de télécharger vos données',
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setExportLoading(false);
     }
   };
 
@@ -638,6 +697,8 @@ export const Settings = () => {
                       leftIcon={<Text>📥</Text>}
                       variant="outline"
                       alignSelf="flex-start"
+                      onClick={handleDownloadData}
+                      isLoading={exportLoading}
                     >
                       Télécharger mes données
                     </Button>
