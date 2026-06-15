@@ -4,8 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 //const API_URL = __DEV__ 
  // ? 'http://192.168.1.x:3000/api'                        
   //: 'https://supcontent-production.up.railway.app/api';
-  //const API_URL = 'http://192.168.1.x:3000/api';
-const API_URL = 'https://supcontent-production.up.railway.app/api';
+const API_URL = 'http://192.168.1.72:5000/api';
+//const API_URL = 'https://supcontent-production.up.railway.app/api';
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
