@@ -1,8 +1,11 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+//const API_URL = __DEV__ 
+ // ? 'http://192.168.1.x:3000/api'                        
+  //: 'https://supcontent-production.up.railway.app/api';
+  //const API_URL = 'http://192.168.1.x:3000/api';
 const API_URL = 'https://supcontent-production.up.railway.app/api';
-
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
@@ -82,8 +85,7 @@ export const userAPI = {
 
 // ── SOCIAL ────────────────────────────────────
 export const socialAPI = {
-  // Events & Rooms (mock-ready, bascule sur backend si dispo)
-  getActiveRooms: () => api.get('/rooms/active'),
+  // --- EVENTS ---
   getEvents: async () => {
     try {
       const liveRes = await api.get('/events/live');
@@ -94,7 +96,7 @@ export const socialAPI = {
     }
   },
   
-  // --- FOLLOW (Corrigé pour correspondre au backend) ---
+  // --- FOLLOW ---
   followUser: (userId) => api.post(`/social/follow/${userId}`),
   unfollowUser: (userId) => api.post(`/social/unfollow/${userId}`),  
   getFollowers: (userId) => api.get(`/social/${userId}/followers`),
@@ -104,12 +106,21 @@ export const socialAPI = {
   searchUsers: (query) => api.get(`/social/search?q=${query}`),
   getFeed: () => api.get('/social/feed'),
 
+  // --- ROOMS (Salons) ---
   getActiveRooms: () => api.get('/rooms/active'),
+  getRoomById: (roomId) => api.get(`/rooms/${roomId}`), 
   createRoom: (roomData) => api.post('/rooms', roomData),
   joinRoom: (roomId) => api.post(`/rooms/${roomId}/join`),
   leaveRoom: (roomId) => api.post(`/rooms/${roomId}/leave`),
-};
+  
+  // --- ROOM MODERATION ---
+  banUserFromRoom: (roomId, targetUserId, data) => api.post(`/rooms/${roomId}/ban/${targetUserId}`, data), // 🟢 NOUVEAU : Bannir
+  getBannedUsers: (roomId) => api.get(`/rooms/${roomId}/banned`), // 🟢 NOUVEAU : Liste des bannis
 
+  // --- ROOM MESSAGES ---
+  getRoomMessages: (roomId) => api.get(`/rooms/${roomId}/messages`), // 🟢 NOUVEAU : Historique du chat
+  sendRoomMessage: (roomId, messageData) => api.post(`/rooms/${roomId}/messages`, messageData), // 🟢 NOUVEAU : Envoyer un message
+};
 // ── MESSAGES ──────────────────────────────────
 export const messageAPI = {
   getConversations: () => api.get('/messages/conversations'),
