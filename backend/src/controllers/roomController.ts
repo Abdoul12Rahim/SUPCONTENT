@@ -17,15 +17,19 @@ export const getActiveRooms = async (req: Request, res: Response) => {
 
 export const createRoom = async (req: Request, res: Response) => {
   try {
-    const { name, description, visibility, rules, avatar } = req.body;
+    // On récupère le linkedGame envoyé par le mobile
+    const { name, description, linkedGame } = req.body;
     const currentUserId = req.user!._id;
 
     const newRoom = new Room({
-      name, description, visibility, rules, avatar,
+      name, 
+      description,
+      linkedGame, 
+      visibility: 'public', 
       creator: currentUserId,
       members: [{
         user: currentUserId,
-        role: 'admin' // Le créateur est admin automatiquement
+        role: 'admin'
       }]
     });
 

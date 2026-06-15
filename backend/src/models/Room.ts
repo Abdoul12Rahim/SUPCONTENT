@@ -4,6 +4,11 @@ export interface IRoom extends Document {
   name: string;
   description?: string;
   avatar?: string;
+  linkedGame: {
+    gameId: { type: String, required: true },
+    name: { type: String, required: true },
+    imageUrl: { type: String, default: '' }
+  },
   visibility: 'public' | 'private';
   rules?: string;
   creator: mongoose.Types.ObjectId;
