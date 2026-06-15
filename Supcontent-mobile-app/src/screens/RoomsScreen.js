@@ -50,6 +50,7 @@ export default function RoomsScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
+  
   const fetchRooms = useCallback(async () => {
     setIsLoading(true);
     try {
